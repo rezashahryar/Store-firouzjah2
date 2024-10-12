@@ -83,6 +83,12 @@ class Product(models.Model):
     product_status = models.CharField(max_length=2, choices=ProductStatus.choices, default=ProductStatus.WAITING)
     active_status = models.BooleanField(default=False)
 
+    reason = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_('به هنگام  خارج کردن وضعیت محصول از در انتظار تایید این بخش پر شود')
+    )
+
 
 class ProductImage(models.Model):
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='images')
