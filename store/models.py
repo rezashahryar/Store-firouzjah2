@@ -56,6 +56,11 @@ class Product(models.Model):
     class ProductUnit(models.TextChoices):
         PAIR = 'p', _('جفت')
 
+    class ProductStatus(models.TextChoices):
+        APPROVED = 'ap', _('تایید شده')
+        WAITING = 'w', _('در انتظار تایید')
+        NOT_APPROVED = 'na', _('تایید نشده')
+
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='products')
 
     size = models.CharField(max_length=4, choices=ProductSize.choices)
@@ -74,6 +79,9 @@ class Product(models.Model):
 
     shenaase_kaala = models.CharField(max_length=25)
     barcode = models.CharField(max_length=25)
+
+    product_status = models.CharField(max_length=2, choices=ProductStatus.choices, default=ProductStatus.WAITING)
+    active_status = models.BooleanField(default=False)
 
 
 class ProductImage(models.Model):
