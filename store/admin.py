@@ -5,6 +5,26 @@ from . import models
 # Register your models here.
 
 
+@admin.register(models.ShipingRange)
+class ShipingRangeAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.ShipingMethod)
+class ShipingMethodAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.ShipingProperty)
+class ShipingPropertyAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.ShipingCost)
+class ShipingCostAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.ProductCategory)
 class ProductCategoryAdmin(admin.ModelAdmin):
     ...
