@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     # third party apps
     'rest_framework',
+    'debug_toolbar',
 
     # local apps
     'core.apps.CoreConfig',
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware', # django debug toolbar pack
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -139,3 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # config custom user model
 AUTH_USER_MODEL = 'core.User'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
