@@ -73,3 +73,8 @@ class Product(models.Model):
     shenaase_kaala = models.CharField(max_length=25)
     barcode = models.CharField(max_length=25)
 
+
+class ProductImage(models.Model):
+    base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to=f'store/product-{base_product}/')
+    is_cover = models.BooleanField(default=False)
