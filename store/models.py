@@ -37,6 +37,7 @@ class BaseProduct(models.Model):
     # store
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
+    product_code = models.CharField(max_length=6, unique=True)
     authenticity = models.CharField(max_length=3, choices=ProductAuthenticity.choices, default=ProductAuthenticity.ORIGINAL)
     warranty = models.CharField(max_length=2, choices=ProductWarranty.choices, default=ProductWarranty.HAS)
     shiping_method = models.CharField(max_length=2, choices=ShipingMethod.choices)
