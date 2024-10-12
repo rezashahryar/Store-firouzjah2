@@ -18,3 +18,8 @@ class ProductSubCategoryAdmin(admin.ModelAdmin):
 @admin.register(models.BaseProduct)
 class BaseProductAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.Product)
+class ProductAdmin(admin.ModelAdmin):
+    ...
