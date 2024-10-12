@@ -29,6 +29,8 @@ class BaseProduct(models.Model):
 
     class ProductAuthenticity(models.TextChoices):
         ORIGINAL = 'org', _('اورجینال')
+        HIGH_COPY = 'hc', 'های کپی'
+        COPY = 'c', 'کپی'
     
     class ProductWarranty(models.TextChoices):
         HAS = 'h', _('دارد')
@@ -78,3 +80,30 @@ class ProductImage(models.Model):
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to=f'store/product-{base_product}/')
     is_cover = models.BooleanField(default=False)
+
+
+class ShipingRange(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+    
+
+class ShipingMethod(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class ShipingProperty(models.Model):
+    # store: must be one to one field
+    shiping_range = models.ManyToManyField(ShipingRange, related_name='shiping_property')
+    shiping_method = models.ManyToManyField(ShipingMethod, related_name='shiping_method')
+
+
+class ShipingCost(models.Model):
+    shiping_method = models.ForeignKey(ShipingMethod, on_delete=models.CASCADE, related_name='shiping_cost')
+    origin = models.CharField(max_length=255)
+    destination = models.CharField(max_length=255)
+    cost = models.IntegerField()
