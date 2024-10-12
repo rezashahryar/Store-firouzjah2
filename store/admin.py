@@ -42,9 +42,9 @@ class BaseProductAdmin(admin.ModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
-    ...
+    exclude = ['slug']
 
 
 @admin.register(models.ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    ...
+    list_display = ['base_product', 'is_cover']

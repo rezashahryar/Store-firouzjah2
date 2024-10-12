@@ -40,6 +40,7 @@ class BaseProduct(models.Model):
         PISHTAAZ = 'pi', _('پیشتاز')
 
     # store
+    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
     product_code = models.CharField(max_length=6, unique=True)
@@ -65,6 +66,7 @@ class Product(models.Model):
 
     size = models.CharField(max_length=4, choices=ProductSize.choices)
     inventory = models.PositiveIntegerField()
+    slug = models.SlugField(null=True)
     unit = models.CharField(max_length=1, choices=ProductUnit.choices)
     unit_price = models.IntegerField()
 
@@ -89,11 +91,21 @@ class Product(models.Model):
         help_text=_('به هنگام  خارج کردن وضعیت محصول از در انتظار تایید این بخش پر شود')
     )
 
+    def save(self, *args, **kwargs):
+        self.slug = self.generate_unique_slug(self.pk, self.shenaase_kaala, self.barcode)
+        return super().save(*args, **kwargs)
+    
+    def generate_unique_slug(self, value1, value2, value3):
+        return f'{value1}--{value2}--{value3}'
+
 
 class ProductImage(models.Model):
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to=f'store/product-{base_product}/')
+    image = models.ImageField(upload_to='store/product-images/')
     is_cover = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return self.base_product.title_farsi
 
 
 class ShipingRange(models.Model):
