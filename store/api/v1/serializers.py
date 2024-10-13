@@ -5,18 +5,33 @@ from store import models
 # create your serializers here
 
 
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductCategory
+        fields = ['name', 'slug']
+
+
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductImage
         fields = ['image']
 
 
+class ProductPropertiesSerializer(serializers.ModelSerializer):
+    property = serializers.StringRelatedField()
+    class Meta:
+        model = models.SetProductProperty
+        fields = ['property', 'value']
+
+
 class BaseProductDetailSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True)
+    properties = ProductPropertiesSerializer(many=True)
+
     class Meta:
         model = models.BaseProduct
         fields = [
-            'title_farsi', 'title_english', 'product_code', 'images'
+            'title_farsi', 'title_english', 'product_code', 'images', 'properties'
         ]
 
 

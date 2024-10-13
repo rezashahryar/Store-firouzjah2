@@ -6,7 +6,15 @@ from .model_fields import ProductSize
 # Create your models here.
 
 
+class ProductProperties(models.Model):
+    title = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.title
+
+
 class ProductCategory(models.Model):
+    properties = models.ManyToManyField(ProductProperties, related_name='categories')
     name = models.CharField(max_length=255)
     slug = models.SlugField()
     image = models.ImageField(upload_to='store/product-category-images/')
@@ -50,6 +58,15 @@ class BaseProduct(models.Model):
 
     def __str__(self) -> str:
         return self.title_farsi
+    
+
+class SetProductProperty(models.Model):
+    product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='properties')
+    property = models.ForeignKey(ProductProperties, on_delete=models.CASCADE)
+    value = models.CharField(max_length=250)
+
+    def __str__(self):
+        return f'property {self.property} for {self.product.title_farsi} with value {self.value}'
     
 
 class Product(models.Model):
@@ -97,6 +114,9 @@ class Product(models.Model):
     
     def generate_unique_slug(self, value1, value2, value3):
         return f'{value1}--{value2}--{value3}'
+    
+    def __str__(self) -> str:
+        return self.base_product.title_farsi
 
 
 class ProductImage(models.Model):

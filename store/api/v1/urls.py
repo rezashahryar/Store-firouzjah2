@@ -9,6 +9,7 @@ router = routers.DefaultRouter()
 router.register('products', views.ProductViewSet, basename='products')
 
 urlpatterns = [
+    path('list/category/', views.ProductCategoryListApiView.as_view(), name='list_category'),
     path('', include(router.urls)),
 ]
 

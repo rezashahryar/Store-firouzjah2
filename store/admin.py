@@ -27,7 +27,7 @@ class ShipingCostAdmin(admin.ModelAdmin):
 
 @admin.register(models.ProductCategory)
 class ProductCategoryAdmin(admin.ModelAdmin):
-    ...
+    prepopulated_fields = {'slug': ('name', )}
 
 
 @admin.register(models.ProductSubCategory)
@@ -42,9 +42,26 @@ class BaseProductAdmin(admin.ModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
+    list_display = ['title', 'unit_price', 'size', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode']
+    list_editable = ['discount_percent']
     exclude = ['slug']
+    list_select_related = ['base_product']
+
+    @admin.display(ordering='base_product__title_farsi')
+    def title(self, obj):
+        return obj.base_product.title_farsi
 
 
 @admin.register(models.ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['base_product', 'is_cover']
+
+
+@admin.register(models.ProductProperties)
+class ProductPropertiesAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.SetProductProperty)
+class SetProductPropertyAdmin(admin.ModelAdmin):
+    ...
