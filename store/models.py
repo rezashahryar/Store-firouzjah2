@@ -1,9 +1,79 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, validate_integer
 
 from .model_fields import ProductSize
 # Create your models here.
+
+
+class Province(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+    
+
+class City(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+    
+
+class Mantaghe(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Store(models.Model):
+
+    class StoreType(models.TextChoices):
+        HAGHIGHY = 'ha', _('حقیقی')
+        HOGHOUGHY = 'ho', _('حقوقی')
+
+    store_name = models.CharField(max_length=255)
+
+    email = models.EmailField()
+    shabaa_num = models.CharField(max_length=55)
+
+    mobile_num = models.CharField(max_length=12, validators=[validate_integer])
+    phone_num = models.CharField(max_length=12, validators=[validate_integer])
+
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='stores')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='stores')
+    mantaghe = models.ForeignKey(Mantaghe, on_delete=models.CASCADE, related_name='stores')
+    mahalle = models.CharField(max_length=255)
+    address = models.TextField()
+    post_code = models.CharField(max_length=10, validators=[validate_integer])
+
+    store_type = models.CharField(max_length=2, choices=StoreType.choices)
+
+    def __str__(self) -> str:
+        return self.store_name
+    
+
+class HoghoughyStore(Store):
+    name_CEO = models.CharField(max_length=255)
+    registration_date = models.DateField()
+    registration_num = models.CharField(max_length=255)
+    national_id = models.CharField(max_length=255, verbose_name='شناسه (کد) ملی')
+    economic_code = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.store_name
+    
+
+class HaghighyStore(Store):
+    full_name = models.CharField(max_length=255)
+    father_name = models.CharField(max_length=255)
+    birth_date = models.DateField()
+    national_code = models.CharField(max_length=15, validators=[validate_integer])
+    shomaare_shenasnaame = models.CharField(max_length=15, validators=[validate_integer])
+
+    def __str__(self) -> str:
+        return self.store_name
 
 
 class ProductProperties(models.Model):
@@ -96,8 +166,8 @@ class Product(models.Model):
     height_package = models.IntegerField(null=True, blank=True)
     weight_package = models.IntegerField(null=True, blank=True)
 
-    shenaase_kaala = models.CharField(max_length=25, null=True, blank=True)
-    barcode = models.CharField(max_length=25, null=True, blank=True)
+    shenaase_kaala = models.CharField(max_length=25)
+    barcode = models.CharField(max_length=25)
 
     product_status = models.CharField(max_length=2, choices=ProductStatus.choices, default=ProductStatus.WAITING)
     active_status = models.BooleanField(default=False)

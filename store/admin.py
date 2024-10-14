@@ -5,6 +5,36 @@ from . import models
 # Register your models here.
 
 
+@admin.register(models.Province)
+class ProvinceAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.City)
+class CityAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.Mantaghe)
+class MantagheAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.Store)
+class StoreAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.HoghoughyStore)
+class HoghoughyStore(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.HaghighyStore)
+class HaghighyStoreAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.ShipingRange)
 class ShipingRangeAdmin(admin.ModelAdmin):
     ...
