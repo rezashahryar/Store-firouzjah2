@@ -153,6 +153,18 @@ class ProductComment(models.Model):
         return self.user
     
 
+class ReplyComment(models.Model):
+    comment = models.ForeignKey(ProductComment, on_delete=models.CASCADE, related_name='replies')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='replies')
+
+    text = models.TextField()
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.comment
+    
+
 class Product(models.Model):
 
     class ProductUnit(models.TextChoices):
