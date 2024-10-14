@@ -117,7 +117,7 @@ class BaseProduct(models.Model):
     class ShipingMethod(models.TextChoices):
         PISHTAAZ = 'pi', _('پیشتاز')
 
-    # store
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products', null=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
