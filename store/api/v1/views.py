@@ -22,7 +22,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         queryset = models.Product.objects.select_related('base_product__category') \
-            .prefetch_related(Prefetch(
+            .select_related('base_product__sub_category').prefetch_related(Prefetch(
                 'base_product__properties',
                 queryset=models.SetProductProperty.objects.select_related('property')
         )).all()

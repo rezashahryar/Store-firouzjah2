@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_integer
+from django.conf import settings
 
 from .model_fields import ProductSize
 # Create your models here.
@@ -119,6 +120,7 @@ class BaseProduct(models.Model):
 
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products', null=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products', null=True)
+    sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
     product_code = models.CharField(max_length=6, unique=True)
@@ -137,6 +139,18 @@ class SetProductProperty(models.Model):
 
     def __str__(self):
         return f'property {self.property} for {self.product.title_farsi} with value {self.value}'
+    
+
+class ProductComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
+    product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='comments')
+
+    text = models.TextField()
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.user
     
 
 class Product(models.Model):

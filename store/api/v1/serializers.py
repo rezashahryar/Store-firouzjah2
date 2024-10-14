@@ -27,16 +27,19 @@ class ProductPropertiesSerializer(serializers.ModelSerializer):
 class BaseProductDetailSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True)
     properties = ProductPropertiesSerializer(many=True)
+    category = serializers.StringRelatedField()
+    sub_category = serializers.StringRelatedField()
 
     class Meta:
         model = models.BaseProduct
         fields = [
-            'title_farsi', 'title_english', 'product_code', 'images', 'properties'
+            'category', 'sub_category', 'title_farsi', 'title_english', 'product_code', 'images', 'properties'
         ]
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     base_product = BaseProductDetailSerializer()
+    unit = serializers.CharField(source='get_unit_display')
     
     class Meta:
         model = models.Product

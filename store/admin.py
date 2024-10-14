@@ -67,6 +67,11 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(models.ProductSubCategory)
 class ProductSubCategoryAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ('name', )}
+
+
+@admin.register(models.ProductComment)
+class ProductCommentAdmin(admin.ModelAdmin):
     ...
 
 
