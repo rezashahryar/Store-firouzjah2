@@ -87,17 +87,17 @@ class Product(models.Model):
     unit = models.CharField(max_length=1, choices=ProductUnit.choices)
     unit_price = models.IntegerField()
 
-    discount_percent = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
-    start_discount_datetime = models.DateTimeField()
-    end_discount_datetime = models.DateTimeField()
+    discount_percent = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], null=True, blank=True)
+    start_discount_datetime = models.DateTimeField(null=True, blank=True)
+    end_discount_datetime = models.DateTimeField(null=True, blank=True)
 
-    length_package = models.IntegerField()
-    width_package = models.IntegerField()
-    height_package = models.IntegerField()
-    weight_package = models.IntegerField()
+    length_package = models.IntegerField(null=True, blank=True)
+    width_package = models.IntegerField(null=True, blank=True)
+    height_package = models.IntegerField(null=True, blank=True)
+    weight_package = models.IntegerField(null=True, blank=True)
 
-    shenaase_kaala = models.CharField(max_length=25)
-    barcode = models.CharField(max_length=25)
+    shenaase_kaala = models.CharField(max_length=25, null=True, blank=True)
+    barcode = models.CharField(max_length=25, null=True, blank=True)
 
     product_status = models.CharField(max_length=2, choices=ProductStatus.choices, default=ProductStatus.WAITING)
     active_status = models.BooleanField(default=False)
