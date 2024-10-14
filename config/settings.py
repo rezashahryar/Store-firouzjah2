@@ -146,3 +146,7 @@ AUTH_USER_MODEL = 'core.User'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+PATH_PROVINCE_MODEL = 'store.Province'
+PATH_CITY_MODEL = 'store.City'
+PATH_MANTAGHE_MODEL = 'store.Mantaghe'
