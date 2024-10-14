@@ -8,7 +8,7 @@ from store import models
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductCategory
-        fields = ['name', 'slug']
+        fields = ['name', 'image', 'slug']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
