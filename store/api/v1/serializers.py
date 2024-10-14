@@ -66,7 +66,7 @@ class ProductListSerializer(serializers.ModelSerializer):
                 img_obj = img
                 context['cover'] = ProductImageSerializer(img_obj).data
             elif not img.base_product_id == instance.base_product.pk and img.is_cover:
-                context['cover'] = None
+                continue
         
         # try:
         #     cover = models.ProductImage.objects.get(base_product_id=instance.base_product.pk, is_cover=True)
