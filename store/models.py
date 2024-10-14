@@ -223,3 +223,14 @@ class ShipingCost(models.Model):
     origin = models.CharField(max_length=255)
     destination = models.CharField(max_length=255)
     cost = models.IntegerField()
+
+
+class ContactUs(models.Model):
+    full_name = models.CharField(max_length=255)
+    mobile_num = models.CharField(max_length=11, validators=[validate_integer])
+    email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self) -> str:
+        return f'{self.full_name}: {self.email}'
