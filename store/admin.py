@@ -119,9 +119,15 @@ class SetProductPropertyAdmin(admin.ModelAdmin):
     ...
 
 
+class CartItemInline(admin.TabularInline):
+    model = models.CartItem
+    fields = ['product', 'quantity']
+    extra = 1
+
+
 @admin.register(models.Cart)
 class CartAdmin(admin.ModelAdmin):
-    ...
+    inlines = [CartItemInline]
 
 
 @admin.register(models.CartItem)
