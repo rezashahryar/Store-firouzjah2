@@ -220,7 +220,7 @@ class Product(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        self.slug = self.generate_unique_slug(self.pk, self.shenaase_kaala, self.barcode)
+        self.slug = self.generate_unique_slug(self.base_product.pk, self.shenaase_kaala, self.barcode)
         return super().save(*args, **kwargs)
     
     def generate_unique_slug(self, value1, value2, value3):
@@ -244,7 +244,7 @@ class SimilarProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='similar_products')
 
     def __str__(self) -> str:
-        return self.product
+        return str(self.product.base_product.title_farsi)
 
 
 class ShipingRange(models.Model):
