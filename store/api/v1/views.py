@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework import generics
 from rest_framework import mixins
 from django.db.models import Prefetch
@@ -60,3 +60,17 @@ class ProductViewSet(mixins.RetrieveModelMixin,
         return {
             'images': models.ProductImage.objects.all()
         }
+    
+
+class CartViewSet(mixins.CreateModelMixin,
+                mixins.RetrieveModelMixin,
+                mixins.DestroyModelMixin,
+                GenericViewSet):
+    serializer_class = serializers.CartSerializer
+    queryset = models.Cart.objects.prefetch_related(Prefetch(
+        'items',
+        queryset=models.CartItem.objects.select_related('product__base_product')
+    )).all()
+
+    def get_serializer_context(self):
+        return {'images': models.ProductImage.objects.all()}

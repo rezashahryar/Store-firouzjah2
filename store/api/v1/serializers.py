@@ -136,3 +136,49 @@ class SimilarProductSerializer(serializers.ModelSerializer):
         fields = [
             'store', 'product'
         ]
+
+
+class CartProductSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='base_product.title_farsi')
+
+    class Meta:
+        model = models.Product
+        fields = ['title', 'slug', 'unit_price', 'discount_percent']
+
+    def to_representation(self, instance):
+        context = super().to_representation(instance)
+
+        images = self.context['images']
+        for img in images:
+            if img.base_product_id == instance.base_product.pk and img.is_cover:
+                img_obj = img
+                context['cover'] =ProductImageSerializer(img_obj).data
+            elif not img.base_product_id == instance.base_product.pk and img.is_cover:
+                continue
+
+        return context
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = CartProductSerializer()
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.CartItem
+        fields = ['total_price', 'product', 'quantity']
+
+    def get_total_price(self, obj):
+        return obj.product.unit_price * obj.quantity
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price_of_cart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Cart
+        fields = ['id', 'total_price_of_cart', 'items']
+        read_only_fields = ['id']
+
+    def get_total_price_of_cart(self, obj):
+        return sum(item.product.unit_price * item.quantity for item in obj.items.all())
