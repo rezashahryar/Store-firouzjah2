@@ -5,6 +5,11 @@ from . import models
 # Register your models here.
 
 
+@admin.register(models.SimilarProduct)
+class SimilarProductAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.ContactUs)
 class ContactUsAdmin(admin.ModelAdmin):
     ...

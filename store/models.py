@@ -237,6 +237,14 @@ class ProductImage(models.Model):
 
     def __str__(self) -> str:
         return self.base_product.title_farsi
+    
+
+class SimilarProduct(models.Model):
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='similar_products')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='similar_products')
+
+    def __str__(self) -> str:
+        return self.product
 
 
 class ShipingRange(models.Model):
