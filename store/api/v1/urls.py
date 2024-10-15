@@ -10,6 +10,7 @@ router.register('products', views.ProductViewSet, basename='products')
 
 urlpatterns = [
     path('list/category/', views.ProductCategoryListApiView.as_view(), name='list_category'),
+    path('similar-products/<int:product_pk>/', views.ListSimmilarProductViewSet.as_view(), name='list_similar_product'),
     path('', include(router.urls)),
 ]
 

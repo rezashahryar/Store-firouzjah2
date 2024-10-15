@@ -89,7 +89,7 @@ class ReplyCommentAdmin(admin.ModelAdmin):
 
 @admin.register(models.BaseProduct)
 class BaseProductAdmin(admin.ModelAdmin):
-    ...
+    list_display = ['title_farsi', 'store', 'category', 'sub_category', 'product_type']
 
 
 @admin.register(models.Product)

@@ -50,6 +50,7 @@ class Store(models.Model):
     address = models.TextField()
     post_code = models.CharField(max_length=10, validators=[validate_integer])
 
+    store_code = models.CharField(max_length=10, null=True)
     store_type = models.CharField(max_length=2, choices=StoreType.choices)
 
     def __str__(self) -> str:
@@ -218,6 +219,9 @@ class Product(models.Model):
         blank=True,
         help_text=_('به هنگام  خارج کردن وضعیت محصول از در انتظار تایید این بخش پر شود')
     )
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+    datetime_modified = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         self.slug = self.generate_unique_slug(self.base_product.pk, self.shenaase_kaala, self.barcode)

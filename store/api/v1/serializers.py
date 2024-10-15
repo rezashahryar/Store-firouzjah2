@@ -62,7 +62,8 @@ class BaseProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BaseProduct
         fields = [
-            'store', 'category', 'sub_category', 'title_farsi', 'title_english', 'product_code', 'images', 'properties'
+            'id', 'store', 'category', 'sub_category', 'title_farsi', 'title_english', 'product_code',
+            'images', 'properties'
         ]
 
 
@@ -73,7 +74,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = [
-            'base_product', 'size', 'inventory', 'unit', 'unit_price', 'discount_percent',
+            'id', 'base_product', 'size', 'inventory', 'unit', 'unit_price', 'discount_percent',
             'start_discount_datetime', 'end_discount_datetime'
         ]
 
@@ -85,7 +86,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = [
-            'title', 'category', 'slug', 'unit_price', 'discount_percent', 'start_discount_datetime',
+            'id', 'title', 'category', 'slug', 'unit_price', 'discount_percent', 'start_discount_datetime',
             'end_discount_datetime'
         ]
 
@@ -107,3 +108,31 @@ class ProductListSerializer(serializers.ModelSerializer):
         # context['cover'] = ProductImageSerializer(cover).data
 
         return context
+    
+
+class SimilarStoreDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Store
+        fields = ['id', 'store_name', 'store_code']
+    
+
+class SimilarProductDetailSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='base_product.title_farsi')
+
+    class Meta:
+        model = models.Product
+        fields = [
+            'id', 'title', 'discount_percent', 'unit_price', 'start_discount_datetime', 'end_discount_datetime',
+            'datetime_created'
+        ]
+    
+
+class SimilarProductSerializer(serializers.ModelSerializer):
+    store = SimilarStoreDetailSerializer()
+    product = SimilarProductDetailSerializer()
+
+    class Meta:
+        model = models.SimilarProduct
+        fields = [
+            'store', 'product'
+        ]

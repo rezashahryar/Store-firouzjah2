@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import generics
 from rest_framework import mixins
@@ -8,6 +9,18 @@ from store import models
 from . import serializers
 
 # create your views here
+
+
+class ListSimmilarProductViewSet(generics.ListAPIView):
+    serializer_class = serializers.SimilarProductSerializer
+
+    def get_queryset(self):
+        product_id = self.kwargs['product_pk']
+        product_obj = get_object_or_404(models.Product, id=product_id)
+        queryset = models.SimilarProduct.objects.filter(
+            product__base_product__product_type=product_obj.base_product.product_type
+        ).exclude(product_id=product_id)
+        return queryset
 
 
 class ProductCategoryListApiView(generics.ListAPIView):
