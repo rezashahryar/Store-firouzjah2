@@ -132,3 +132,8 @@ class CartItemAdmin(admin.ModelAdmin):
 @admin.register(models.ProductType)
 class ProductTypeAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.ReportProduct)
+class ReportProductAdmin(admin.ModelAdmin):
+    ...

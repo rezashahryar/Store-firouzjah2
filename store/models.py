@@ -243,6 +243,14 @@ class ProductImage(models.Model):
         return self.base_product.title_farsi
     
 
+class ReportProduct(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reports')
+    products = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='reports')
+    text = models.TextField()
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+    
+
 class SimilarProduct(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='similar_products')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='similar_products')
