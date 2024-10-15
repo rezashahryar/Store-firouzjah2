@@ -126,6 +126,7 @@ class BaseProduct(models.Model):
     sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
+    description = models.TextField()
     product_code = models.CharField(max_length=6, unique=True)
     authenticity = models.CharField(max_length=3, choices=ProductAuthenticity.choices, default=ProductAuthenticity.ORIGINAL)
     warranty = models.CharField(max_length=2, choices=ProductWarranty.choices, default=ProductWarranty.HAS)
@@ -242,7 +243,7 @@ class ShipingMethod(models.Model):
 
 
 class ShipingProperty(models.Model):
-    # store: must be one to one field
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='shiping_property')
     shiping_range = models.ManyToManyField(ShipingRange, related_name='shiping_property')
     shiping_method = models.ManyToManyField(ShipingMethod, related_name='shiping_method')
 

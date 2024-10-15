@@ -52,7 +52,7 @@ class ShipingMethodAdmin(admin.ModelAdmin):
 
 @admin.register(models.ShipingProperty)
 class ShipingPropertyAdmin(admin.ModelAdmin):
-    ...
+    list_display = ['store']
 
 
 @admin.register(models.ShipingCost)

@@ -25,7 +25,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
             .select_related('base_product__sub_category').prefetch_related(Prefetch(
                 'base_product__properties',
                 queryset=models.SetProductProperty.objects.select_related('property')
-        )).all()
+        )).select_related('base_product__store').all()
 
         if self.action == 'list':
             return queryset.defer(

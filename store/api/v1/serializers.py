@@ -24,7 +24,36 @@ class ProductPropertiesSerializer(serializers.ModelSerializer):
         fields = ['property', 'value']
 
 
+class ShipingRangeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ShipingRange
+        fields = ['name']
+
+
+class ShipingMethodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ShipingMethod
+        fields = ['name']
+
+
+class ShipingPropertySerializer(serializers.ModelSerializer):
+    shiping_range = ShipingRangeSerializer(many=True)
+    shiping_method = ShipingMethodSerializer(many=True)
+    class Meta:
+        model = models.ShipingProperty
+        fields = ['shiping_range', 'shiping_method']
+
+
+class BaseProductFieldStoreSerializer(serializers.ModelSerializer):
+    shiping_property = ShipingPropertySerializer(many=True)
+
+    class Meta:
+        model = models.Store
+        fields = ['store_name', 'shiping_property']
+
+
 class BaseProductDetailSerializer(serializers.ModelSerializer):
+    store = BaseProductFieldStoreSerializer()
     images = ProductImageSerializer(many=True)
     properties = ProductPropertiesSerializer(many=True)
     category = serializers.StringRelatedField()
@@ -33,7 +62,7 @@ class BaseProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BaseProduct
         fields = [
-            'category', 'sub_category', 'title_farsi', 'title_english', 'product_code', 'images', 'properties'
+            'store', 'category', 'sub_category', 'title_farsi', 'title_english', 'product_code', 'images', 'properties'
         ]
 
 
