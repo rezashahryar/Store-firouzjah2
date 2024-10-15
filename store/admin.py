@@ -120,3 +120,8 @@ class CartAdmin(admin.ModelAdmin):
 @admin.register(models.CartItem)
 class CartItemAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.ProductType)
+class ProductTypeAdmin(admin.ModelAdmin):
+    ...

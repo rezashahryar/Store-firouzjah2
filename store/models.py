@@ -105,6 +105,15 @@ class ProductSubCategory(models.Model):
         return self.name
     
 
+class ProductType(models.Model):
+    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='product_types')
+    sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='product_types')
+    title = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.title
+    
+
 class BaseProduct(models.Model):
 
     class ProductAuthenticity(models.TextChoices):
@@ -125,6 +134,7 @@ class BaseProduct(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products', null=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products', null=True)
     sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products', null=True)
+    product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
     description = models.TextField()
