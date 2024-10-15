@@ -7,7 +7,9 @@ from . import models
 
 @admin.register(models.SimilarProduct)
 class SimilarProductAdmin(admin.ModelAdmin):
-    ...
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('product__base_product')
 
 
 @admin.register(models.ContactUs)
