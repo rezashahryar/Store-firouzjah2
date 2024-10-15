@@ -117,6 +117,9 @@ class BaseProduct(models.Model):
 
     class ShipingMethod(models.TextChoices):
         PISHTAAZ = 'pi', _('پیشتاز')
+        TIPAAX = 'ti', _('تیپاکس')
+        BAARBARI = 'ba', _('باربری')
+        PEYK_MOTORY = 'mo', _('پیک موتوری')
 
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products', null=True)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products', null=True)
