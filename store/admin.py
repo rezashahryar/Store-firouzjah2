@@ -110,3 +110,13 @@ class ProductPropertiesAdmin(admin.ModelAdmin):
 @admin.register(models.SetProductProperty)
 class SetProductPropertyAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.Cart)
+class CartAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    ...

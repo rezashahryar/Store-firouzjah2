@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_integer
@@ -264,3 +265,20 @@ class ContactUs(models.Model):
 
     def __str__(self) -> str:
         return f'{self.full_name}: {self.email}'
+    
+
+class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, default=uuid4)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.id
+    
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='cart_items')
+    quantity = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = [['cart', 'product']]
