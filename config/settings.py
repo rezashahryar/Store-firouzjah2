@@ -152,3 +152,21 @@ INTERNAL_IPS = [
 PATH_PROVINCE_MODEL = 'store.Province'
 PATH_CITY_MODEL = 'store.City'
 PATH_MANTAGHE_MODEL = 'store.Mantaghe'
+
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379",
+#     }
+# }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
