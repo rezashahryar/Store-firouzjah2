@@ -27,9 +27,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'www.didkala-shop.ir',
+    'didkala-shop.ir'
+]
 
 
 # Application definition
@@ -170,3 +173,13 @@ CACHES = {
         }
     }
 }
+
+# config send gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.didkala-shop.ir'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'didkala@didkala-shop.ir'
+EMAIL_HOST_PASSWORD = 'Reza.3661032801_'
+DEFAULT_FROM_EMAIL = 'didkala@didkala-shop.ir'
+# EMAIL_USE_SSL = True
