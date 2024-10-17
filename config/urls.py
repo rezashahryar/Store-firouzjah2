@@ -22,6 +22,7 @@ from debug_toolbar.toolbar import debug_toolbar_urls # django debug toolbar pack
 
 urlpatterns = [
     path('store/', include('store.urls')),
+    path('auth/', include('core.urls')),
     path('admin/', admin.site.urls),
     # django summer note pack
     path('summernote/', include('django_summernote.urls')),
