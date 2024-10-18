@@ -50,7 +50,17 @@ class ProductViewSet(mixins.RetrieveModelMixin,
                 'base_product__category__image', 'base_product__category__slug'
             )
         
-        return queryset
+        return queryset.prefetch_related(
+            Prefetch(
+                'base_product__comments',
+                queryset=models.ProductComment.objects.select_related('user').prefetch_related(
+                    Prefetch(
+                        'replies',
+                        queryset=models.ProductReplyComment.objects.select_related('user')
+                    )
+                )
+            )
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -63,7 +73,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
         }
     
 
-class CreateCommentApiView(generics.CreateAPIView):
+class CreateProductCommentApiView(generics.CreateAPIView):
     queryset = models.ProductComment.objects.all()
     serializer_class = serializers.ProductCommentSerializer
     permission_classes = [IsAuthenticated]
@@ -72,6 +82,18 @@ class CreateCommentApiView(generics.CreateAPIView):
         return {
             'user_id': self.request.user.pk,
             'product_id': self.kwargs['product_id']
+        }
+    
+
+class CreateProductReplyCommentApiView(generics.CreateAPIView):
+    queryset = models.ProductReplyComment
+    serializer_class = serializers.ProductReplyCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_context(self):
+        return {
+            'user_id': self.request.user.pk,
+            'comment_id': self.kwargs['comment_id']
         }
     
 

@@ -178,7 +178,7 @@ class ProductReplyComment(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.comment
+        return f'{self.user} for {self.comment.text[:10]}'
     
 
 class Product(models.Model):

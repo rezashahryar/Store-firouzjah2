@@ -52,7 +52,25 @@ class BaseProductFieldStoreSerializer(serializers.ModelSerializer):
         fields = ['store_name', 'shiping_property']
 
 
+class ProductReplyCommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.ProductReplyComment
+        fields = ['user', 'text', 'datetime_created']
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    replies = ProductReplyCommentSerializer(many=True)
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.ProductComment
+        fields = ['user', 'text', 'datetime_created', 'replies']
+
+
 class BaseProductDetailSerializer(serializers.ModelSerializer):
+    comments = CommentSerializer(many=True)
     store = BaseProductFieldStoreSerializer()
     images = ProductImageSerializer(many=True)
     properties = ProductPropertiesSerializer(many=True)
@@ -63,7 +81,7 @@ class BaseProductDetailSerializer(serializers.ModelSerializer):
         model = models.BaseProduct
         fields = [
             'id', 'store', 'category', 'sub_category', 'title_farsi', 'title_english', 'product_code',
-            'images', 'properties'
+            'images', 'properties', 'comments'
         ]
 
 
@@ -193,5 +211,18 @@ class ProductCommentSerializer(serializers.ModelSerializer):
         return models.ProductComment.objects.create(
             user_id=self.context['user_id'],
             product_id=self.context['product_id'],
+            **validated_data
+        )
+    
+
+class ProductReplyCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductReplyComment
+        fields = ['text']
+
+    def create(self, validated_data):
+        return models.ProductReplyComment.objects.create(
+            comment_id=self.context['comment_id'],
+            user_id=self.context['user_id'],
             **validated_data
         )
