@@ -162,6 +162,7 @@ class CartProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = ['title', 'slug', 'unit_price', 'discount_percent']
+        read_only_fields = ['slug']
 
     def to_representation(self, instance):
         context = super().to_representation(instance)
@@ -183,10 +184,45 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CartItem
-        fields = ['total_price', 'product', 'quantity']
+        fields = ['id', 'total_price', 'product', 'quantity']
 
     def get_total_price(self, obj):
         return obj.product.unit_price * obj.quantity
+    
+
+class AddCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CartItem
+        fields = ['id', 'product', 'quantity']
+
+    def create(self, validated_data):
+        cart_pk = self.context['cart_pk']
+        product = validated_data.get('product')
+        quantity = validated_data['quantity']
+
+        # if models.CartItem.objects.filter(cart_id=cart_pk, product_id=product.pk).exists():
+        #     cart_item = models.CartItem.objects.get(cart_id=cart_pk, product_id=product.pk)
+        #     cart_item.quantity += quantity
+        #     cart_item.save()
+        # else:
+        #     cart_item = models.CartItem.objects.create(cart_id=cart_pk, **validated_data)
+
+        try:
+            cart_item = models.CartItem.objects.get(cart_id=cart_pk, product_id=product.pk)
+            cart_item.quantity += quantity
+            cart_item.save()
+        except models.CartItem.DoesNotExist:
+            cart_item = models.CartItem.objects.create(cart_id=cart_pk, **validated_data)
+
+        self.instance = cart_item
+
+        return cart_item
+    
+
+class UpdateCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CartItem
+        fields = ['quantity']
 
 
 class CartSerializer(serializers.ModelSerializer):

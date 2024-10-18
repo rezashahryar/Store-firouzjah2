@@ -109,3 +109,24 @@ class CartViewSet(mixins.CreateModelMixin,
 
     def get_serializer_context(self):
         return {'images': models.ProductImage.objects.all()}
+    
+
+class CartItemViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'delete', 'patch']
+
+    def get_queryset(self):
+        cart_pk = self.kwargs['cart_pk']
+        return models.CartItem.objects.select_related('product__base_product').filter(cart_id=cart_pk)
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return serializers.AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return serializers.UpdateCartItemSerializer
+        return serializers.CartItemSerializer
+
+    def get_serializer_context(self):
+        return {
+            'images': models.ProductImage.objects.all(),
+            'cart_pk': self.kwargs['cart_pk'],
+        }

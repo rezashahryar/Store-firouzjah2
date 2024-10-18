@@ -302,7 +302,7 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.id
+        return str(self.id)
     
 
 class CartItem(models.Model):

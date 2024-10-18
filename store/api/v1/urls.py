@@ -1,5 +1,5 @@
 from django.urls import path, include
-from rest_framework import routers
+from rest_framework_nested import routers
 
 from . import views
 
@@ -8,6 +8,9 @@ from . import views
 router = routers.DefaultRouter()
 router.register('products', views.ProductViewSet, basename='products')
 router.register('cart', views.CartViewSet, basename='cart')
+
+cart_item_router = routers.NestedDefaultRouter(router, 'cart', lookup='cart')
+cart_item_router.register('items', views.CartItemViewSet, basename='cart_item')
 
 urlpatterns = [
     path('list/category/', views.ProductCategoryListApiView.as_view(), name='list_category'),
@@ -26,6 +29,5 @@ urlpatterns = [
         views.ListSimmilarProductViewSet.as_view(),
         name='list_similar_product'
     ),
-    path('', include(router.urls)),
-]
+] + router.urls + cart_item_router.urls
 
