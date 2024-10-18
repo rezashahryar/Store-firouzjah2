@@ -184,3 +184,9 @@ EMAIL_HOST_USER = 'didkala@didkala-shop.ir'
 EMAIL_HOST_PASSWORD = 'Reza.3661032801_'
 DEFAULT_FROM_EMAIL = 'didkala@didkala-shop.ir'
 # EMAIL_USE_SSL = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}

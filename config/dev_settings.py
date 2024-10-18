@@ -179,3 +179,9 @@ EMAIL_HOST_USER = 'reza.shahryarineya7851@gmail.com'
 EMAIL_HOST_PASSWORD = 'wxmx aseh pyyp lpfr '
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
