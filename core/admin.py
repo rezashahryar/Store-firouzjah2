@@ -4,11 +4,6 @@ from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 
 
-@admin.register(models.RequestOtp)
-class RequestOtpAdmin(admin.ModelAdmin):
-    ...
-
-
 @admin.register(models.User)
 class CustomUserAdmin(UserAdmin):
     model = models.User
