@@ -169,7 +169,7 @@ class ProductComment(models.Model):
         return f'{self.user} for {self.product}'
     
 
-class ReplyComment(models.Model):
+class ProductReplyComment(models.Model):
     comment = models.ForeignKey(ProductComment, on_delete=models.CASCADE, related_name='replies')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='replies')
 

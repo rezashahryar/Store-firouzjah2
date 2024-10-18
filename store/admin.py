@@ -82,7 +82,7 @@ class ProductCommentAdmin(admin.ModelAdmin):
     ...
 
 
-@admin.register(models.ReplyComment)
+@admin.register(models.ProductReplyComment)
 class ReplyCommentAdmin(admin.ModelAdmin):
     ...
 
