@@ -11,6 +11,7 @@ router.register('cart', views.CartViewSet, basename='cart')
 
 urlpatterns = [
     path('list/category/', views.ProductCategoryListApiView.as_view(), name='list_category'),
+    path('create/product-comment/<int:product_id>/', views.CreateCommentApiView.as_view(), name='create_product_comment'),
     path('similar-products/<int:product_pk>/', views.ListSimmilarProductViewSet.as_view(), name='list_similar_product'),
     path('', include(router.urls)),
 ]

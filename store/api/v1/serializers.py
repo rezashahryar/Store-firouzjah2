@@ -182,3 +182,16 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_total_price_of_cart(self, obj):
         return sum(item.product.unit_price * item.quantity for item in obj.items.all())
+    
+
+class ProductCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductComment
+        fields = ['text']
+
+    def create(self, validated_data):
+        return models.ProductComment.objects.create(
+            user_id=self.context['user_id'],
+            product_id=self.context['product_id'],
+            **validated_data
+        )

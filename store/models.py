@@ -166,7 +166,7 @@ class ProductComment(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user
+        return f'{self.user} for {self.product}'
     
 
 class ReplyComment(models.Model):

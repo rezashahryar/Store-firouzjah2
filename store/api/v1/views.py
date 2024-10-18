@@ -3,6 +3,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework import generics
 from rest_framework import mixins
 from django.db.models import Prefetch
+from rest_framework.permissions import IsAuthenticated
 
 from store import models
 
@@ -59,6 +60,18 @@ class ProductViewSet(mixins.RetrieveModelMixin,
     def get_serializer_context(self):
         return {
             'images': models.ProductImage.objects.all()
+        }
+    
+
+class CreateCommentApiView(generics.CreateAPIView):
+    queryset = models.ProductComment.objects.all()
+    serializer_class = serializers.ProductCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_context(self):
+        return {
+            'user_id': self.request.user.pk,
+            'product_id': self.kwargs['product_id']
         }
     
 
