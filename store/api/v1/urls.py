@@ -15,6 +15,11 @@ cart_item_router.register('items', views.CartItemViewSet, basename='cart_item')
 urlpatterns = [
     path('list/category/', views.ProductCategoryListApiView.as_view(), name='list_category'),
     path(
+        'product/category/<int:cat_pk>/',
+        views.ProductFilterByCategoryListApiView.as_view(),
+        name='filter_product_by_category'
+    ),
+    path(
         'create/product-comment/<int:product_id>/',
         views.CreateProductCommentApiView.as_view(),
         name='create_product_comment'

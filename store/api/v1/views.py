@@ -29,6 +29,14 @@ class ProductCategoryListApiView(generics.ListAPIView):
     serializer_class = serializers.ProductCategorySerializer
 
 
+class ProductFilterByCategoryListApiView(generics.ListAPIView):
+    serializer_class = serializers.ProductListSerializer
+
+    def get_queryset(self):
+        cat_pk = self.kwargs['cat_pk']
+        return models.Product.objects.filter(base_product__category_id=cat_pk)
+
+
 class ProductViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    GenericViewSet):
