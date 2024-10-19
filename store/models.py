@@ -181,6 +181,14 @@ class ProductReplyComment(models.Model):
         return f'{self.user} for {self.comment.text[:10]}'
     
 
+class ProductColor(models.Model):
+    name = models.CharField(max_length=255)
+    code_color = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return self.name
+    
+
 class Product(models.Model):
 
     class ProductUnit(models.TextChoices):
@@ -194,6 +202,7 @@ class Product(models.Model):
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='products')
 
     size = models.CharField(max_length=4, choices=ProductSize.choices)
+    color = models.ForeignKey(ProductColor, on_delete=models.CASCADE, related_name='products', null=True)
     inventory = models.PositiveIntegerField()
     slug = models.SlugField(null=True)
     unit = models.CharField(max_length=1, choices=ProductUnit.choices)

@@ -87,14 +87,21 @@ class BaseProductDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class ProductColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductColor
+        fields = ['name', 'code_color']
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     base_product = BaseProductDetailSerializer()
     unit = serializers.CharField(source='get_unit_display')
+    color = ProductColorSerializer()
     
     class Meta:
         model = models.Product
         fields = [
-            'id', 'base_product', 'size', 'inventory', 'unit', 'unit_price', 'discount_percent',
+            'id', 'base_product', 'size', 'color', 'inventory', 'unit', 'unit_price', 'discount_percent',
             'start_discount_datetime', 'end_discount_datetime'
         ]
 
