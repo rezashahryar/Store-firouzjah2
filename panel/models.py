@@ -65,6 +65,7 @@ class Staff(models.Model):
     mahalle = models.CharField(max_length=255)
     address = models.TextField()
     post_code = models.CharField(max_length=10, validators=[validate_integer])
+    description = models.TextField()
 
     tasvire_personelly = models.ImageField(upload_to='staffs/tasvire_personelly/')
     cart_melly = models.ImageField(upload_to='staffs/cart_melly/')
