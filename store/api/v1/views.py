@@ -4,10 +4,12 @@ from rest_framework import generics
 from rest_framework import mixins
 from django.db.models import Prefetch
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 
 from store import models
 
 from . import serializers
+from .filters import ProductFilter
 
 # create your views here
 
@@ -41,6 +43,8 @@ class ProductViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    GenericViewSet):
     lookup_field = 'slug'
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
 
     def get_queryset(self):
         queryset = models.Product.objects.select_related('base_product__category') \
@@ -68,7 +72,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
                     )
                 )
             )
-        )
+        ).select_related('color')
 
     def get_serializer_class(self):
         if self.action == 'list':
