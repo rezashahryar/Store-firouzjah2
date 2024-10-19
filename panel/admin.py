@@ -8,3 +8,8 @@ from . import models
 @admin.register(models.RequestPhotographyService)
 class RequestPhotographyServiceAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.Staff)
+class StaffAdmin(admin.ModelAdmin):
+    ...
