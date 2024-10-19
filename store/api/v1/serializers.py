@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from store import models
@@ -228,14 +230,28 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)
     total_price_of_cart = serializers.SerializerMethodField()
+    arzesh_afzoode = serializers.SerializerMethodField()
+    sood_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Cart
-        fields = ['id', 'total_price_of_cart', 'items']
+        fields = ['id', 'total_price_of_cart', 'arzesh_afzoode', 'sood_cart', 'items']
         read_only_fields = ['id']
 
-    def get_total_price_of_cart(self, obj):
-        return sum(item.product.unit_price * item.quantity for item in obj.items.all())
+    def get_total_price_of_cart(self, cart):
+        return sum(item.product.unit_price * item.quantity for item in cart.items.all())
+    
+    def get_arzesh_afzoode(self, cart):
+        return int((self.get_total_price_of_cart(cart) * 9) / 100)
+    
+    def get_sood_cart(self, cart):
+        result = 0
+
+        for item in cart.items.all():
+            if item.product.discount_percent:
+                product_amount_discount = ((item.product.discount_percent / Decimal(100)) * item.product.unit_price) * item.quantity
+                result += product_amount_discount
+        return int(result)
     
 
 class ProductCommentSerializer(serializers.ModelSerializer):
