@@ -4,18 +4,21 @@ from rest_framework import generics
 from rest_framework import mixins
 from django.db.models import Prefetch
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from store import models
 
 from . import serializers
-from .filters import ProductFilter
+from .filters import ProductFilter, SimilarProductFilter
 
 # create your views here
 
 
 class ListSimmilarProductViewSet(generics.ListAPIView):
     serializer_class = serializers.SimilarProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SimilarProductFilter
 
     def get_queryset(self):
         product_id = self.kwargs['product_pk']
@@ -31,19 +34,11 @@ class ProductCategoryListApiView(generics.ListAPIView):
     serializer_class = serializers.ProductCategorySerializer
 
 
-class ProductFilterByCategoryListApiView(generics.ListAPIView):
-    serializer_class = serializers.ProductListSerializer
-
-    def get_queryset(self):
-        cat_pk = self.kwargs['cat_pk']
-        return models.Product.objects.filter(base_product__category_id=cat_pk)
-
-
 class ProductViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    GenericViewSet):
     lookup_field = 'slug'
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ProductFilter
 
     def get_queryset(self):
