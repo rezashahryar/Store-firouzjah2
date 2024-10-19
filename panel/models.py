@@ -83,3 +83,12 @@ class Staff(models.Model):
 
     def __str__(self) -> str:
         return self.full_name
+    
+
+class CareerRecords(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='career_records')
+    company_name = models.CharField(max_length=255)
+    job_position = models.CharField(max_length=255, verbose_name='پست سازمانی')
+    reason_leaving_work = models.TextField()
+    duration_activity_based_month = models.IntegerField()
+    insurance_period_based_month = models.IntegerField()

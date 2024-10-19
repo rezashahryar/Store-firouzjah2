@@ -13,3 +13,8 @@ class RequestPhotographyServiceAdmin(admin.ModelAdmin):
 @admin.register(models.Staff)
 class StaffAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.CareerRecords)
+class CareerRecordsAdmin(admin.ModelAdmin):
+    ...
