@@ -312,3 +312,46 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = [['cart', 'product']]
+
+
+class Order(models.Model):
+
+    class OrderStatus(models.TextChoices):
+        CURRENT_ORDERS = 'ou', _('جاری')
+        ORDERS_DELIVERED = 'od', _('تحویل داده شده')
+        RETURN_ORDERS = 'or', _('مرجوع شده')
+        CANCELED_ORDERS = 'oc', _('لغو شده')
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    
+    full_name_recipient = models.CharField(max_length=255)
+    mobile_recipient = models.CharField(max_length=11, validators=[validate_integer])
+    email_recipient = models.EmailField()
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='orders')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='orders')
+    mantaghe = models.ForeignKey(Mantaghe, on_delete=models.CASCADE, related_name='orders')
+    mahalle = models.CharField(max_length=255)
+    address = models.TextField(null=True, blank=True)
+    pelaak = models.CharField(max_length=15)
+    vaahed = models.CharField(max_length=3)
+    post_code = models.CharField(max_length=10, validators=[validate_integer])
+    referrer_code = models.CharField(max_length=255)
+
+    tracking_code = models.CharField(max_length=25)
+
+    status = models.CharField(max_length=2, choices=OrderStatus.choices)
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.user.email
+    
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
+    purchased_price = models.IntegerField()
+    quantity = models.IntegerField()
+
+    class Meta:
+        unique_together = [['order', 'product']]

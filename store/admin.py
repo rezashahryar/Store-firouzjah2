@@ -143,3 +143,13 @@ class ProductTypeAdmin(admin.ModelAdmin):
 @admin.register(models.ReportProduct)
 class ReportProductAdmin(admin.ModelAdmin):
     ...
+
+
+@admin.register(models.Order)
+class OrderAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    ...
