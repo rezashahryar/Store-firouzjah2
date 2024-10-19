@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_summernote',
     'rest_framework.authtoken',
     'django_filters',
+    'drf_yasg',
 
     # local apps
     'core.apps.CoreConfig',
