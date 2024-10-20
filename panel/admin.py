@@ -5,6 +5,11 @@ from . import models
 # Register your models here.
 
 
+@admin.register(models.Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.RequestPhotographyService)
 class RequestPhotographyServiceAdmin(admin.ModelAdmin):
     ...

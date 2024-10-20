@@ -6,6 +6,13 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='profile')
+    full_name = models.CharField(max_length=255)
+    mobile = models.CharField(max_length=12, validators=[validate_integer])
+    email = models.EmailField(null=True)
+
+
 class RequestPhotographyService(models.Model):
     full_name = models.CharField(max_length=255)
     mobile_num = models.CharField(max_length=11, validators=[validate_integer])
