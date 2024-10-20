@@ -40,6 +40,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
     lookup_field = 'slug'
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ProductFilter
+    ordering_fields = ['discount_percent']
 
     def get_queryset(self):
         queryset = models.Product.objects.select_related('base_product__category') \
