@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         ('Authentication', {
             "fields": (
-                'username', 'email', 'password', 'first_name', 'last_name', 'mobile'
+                'username', 'email', 'password', 'first_name', 'last_name'
             ),
         }),
         ('group permissions', {
