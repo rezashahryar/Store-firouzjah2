@@ -150,9 +150,15 @@ class ReportProductAdmin(admin.ModelAdmin):
     ...
 
 
+class OrderItemTabularInline(admin.TabularInline):
+    model = models.OrderItem
+    fields = ['product' ,'purchased_price' ,'quantity']
+    extra = 1
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
-    ...
+    inlines = [OrderItemTabularInline]
 
 
 @admin.register(models.OrderItem)
