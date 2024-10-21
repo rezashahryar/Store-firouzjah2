@@ -24,3 +24,9 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CommonQuestion
         fields = ['type', 'main_subject', 'title', 'text']
+
+
+class FeeForSellingProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FeeForSellingProduct
+        fields = ['category', 'sub_category', 'product_type', 'fee_percent']

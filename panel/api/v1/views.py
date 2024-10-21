@@ -34,3 +34,11 @@ class CommonQuestionViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
     filter_backends = [SearchFilter]
     search_fields = ['title', 'type', 'main_subject', 'text']
+
+
+class FeeForSellingProductViewSet(ModelViewSet):
+    queryset = models.FeeForSellingProduct.objects.all()
+    serializer_class = serializers.FeeForSellingProductSerializer
+    permission_classes = [IsAdminUser]
+    filter_backends = [SearchFilter]
+    search_fields = ['fee_percent', 'product_type', 'category', 'sub_category']
