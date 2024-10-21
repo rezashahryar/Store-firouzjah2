@@ -15,3 +15,12 @@ class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Page
         fields = ['id', 'title', 'text']
+
+
+class CommonQuestionSerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source='get_type_display')
+    main_subject = serializers.CharField(source='get_main_subject_display')
+    
+    class Meta:
+        model = models.CommonQuestion
+        fields = ['type', 'main_subject', 'title', 'text']

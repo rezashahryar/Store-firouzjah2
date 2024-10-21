@@ -8,6 +8,7 @@ from . import views
 router = routers.DefaultRouter()
 
 router.register('pages', views.PageViewSet, basename='pages')
+router.register('common-question', views.CommonQuestionViewSet, basename='common-question')
 
 
 urlpatterns = [

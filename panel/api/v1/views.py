@@ -26,3 +26,11 @@ class PageViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
     filter_backends = [SearchFilter]
     search_fields = ['title']
+
+
+class CommonQuestionViewSet(ModelViewSet):
+    queryset = models.CommonQuestion.objects.all()
+    serializer_class = serializers.CommonQuestionSerializer
+    permission_classes = [IsAdminUser]
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'type', 'main_subject', 'text']
