@@ -135,3 +135,12 @@ class CommonQuestion(models.Model):
 
     def __str__(self) -> str:
         return self.title
+    
+
+class FeeForSellingProduct(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='selling_fees', null=True)
+    category = models.ForeignKey('store.ProductCategory', on_delete=models.CASCADE, related_name='fees')
+    sub_category = models.ForeignKey('store.ProductSubCategory', on_delete=models.CASCADE, related_name='fees')
+    product_type = models.ForeignKey('store.ProductType', on_delete=models.CASCADE, related_name='fees')
+    
+    fee_percent = models.IntegerField()

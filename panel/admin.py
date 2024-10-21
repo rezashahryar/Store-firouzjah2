@@ -5,6 +5,11 @@ from . import models
 # Register your models here.
 
 
+@admin.register(models.FeeForSellingProduct)
+class FeeForSellingProductAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.Page)
 class PageAdmin(admin.ModelAdmin):
     ...
