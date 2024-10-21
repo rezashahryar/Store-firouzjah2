@@ -111,3 +111,27 @@ class Page(models.Model):
 
     def __str__(self) -> str:
         return self.title
+    
+
+class CommonQuestion(models.Model):
+    
+    class TypeCommonQuestionChoices(models.TextChoices):
+        MAIN_SUBJECT = 'ms', _('ثبت موضوع اصلی')
+        QUESTION = 'q', _('پرسش')
+
+    class MainSubjectChoices(models.TextChoices):
+        REGISTER = 'r', _('ثبت نام')
+        CONTRACT_WITH_FIROUZJAH = 'c', _('قرارداد با فیروزجاه')
+        BILL = 'b', _('صورتحساب')
+        ACCOUNT = 'a', _('حساب کاربری')
+
+    main_subject = models.CharField(max_length=1, choices=MainSubjectChoices.choices)
+    type = models.CharField(max_length=2, choices=TypeCommonQuestionChoices.choices)
+
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.title
