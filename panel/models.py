@@ -100,3 +100,14 @@ class CareerRecords(models.Model):
     reason_leaving_work = models.TextField()
     duration_activity_based_month = models.IntegerField()
     insurance_period_based_month = models.IntegerField()
+
+
+class Page(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.PROTECT, related_name='pages', null=True)
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.title

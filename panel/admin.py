@@ -5,6 +5,11 @@ from . import models
 # Register your models here.
 
 
+@admin.register(models.Page)
+class PageAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user_email', 'user_username', 'mobile']
