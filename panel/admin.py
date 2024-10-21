@@ -7,7 +7,16 @@ from . import models
 
 @admin.register(models.Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    ...
+    list_display = ['user_email', 'user_username', 'mobile']
+    list_select_related = ['user']
+
+    def user_email(self, profile):
+        if profile.user.email:
+            return profile.user.email
+        return 'None'
+    
+    def user_username(self, profile):
+        return profile.user.username
 
 
 @admin.register(models.RequestPhotographyService)

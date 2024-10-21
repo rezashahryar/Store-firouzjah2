@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from rest_framework import serializers
+from django.db import transaction
 
 from store import models
 
@@ -190,13 +191,19 @@ class CartProductSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = CartProductSerializer()
     total_price = serializers.SerializerMethodField()
+    amount_discount = serializers.SerializerMethodField()
 
     class Meta:
         model = models.CartItem
-        fields = ['id', 'total_price', 'product', 'quantity']
+        fields = ['id', 'total_price', 'amount_discount', 'quantity', 'product']
 
     def get_total_price(self, obj):
         return obj.product.unit_price * obj.quantity
+    
+    def get_amount_discount(self, cart_item):
+        if cart_item.product.discount_percent:
+            return int((cart_item.product.discount_percent / Decimal(100)) * self.get_total_price(cart_item))
+        return 0
     
 
 class AddCartItemSerializer(serializers.ModelSerializer):
@@ -259,7 +266,100 @@ class CartSerializer(serializers.ModelSerializer):
                 product_amount_discount = ((item.product.discount_percent / Decimal(100)) * item.product.unit_price) * item.quantity
                 result += product_amount_discount
         return int(result)
-    
+
+
+class CreateOrderSerializer(serializers.ModelSerializer):
+    cart_id = serializers.UUIDField()
+
+    class Meta:
+        model = models.Order
+        fields = [
+            'id', 'cart_id', 'full_name_recipient', 'mobile_recipient', 'email_recipient', 'province', 'city', 'mantaghe',
+            'mahalle', 'address', 'pelaak', 'vaahed', 'post_code', 'referrer_code', 'tracking_code',
+            'datetime_created'
+        ]
+
+    def validate_cart_id(self, cart_id):
+        try:
+            if models.Cart.objects.prefetch_related('items').get(id=cart_id).items.count() == 0:
+                raise serializers.ValidationError('کارت شما فاقد محصول میباشد')
+        except models.Cart.DoesNotExist:
+            raise serializers.ValidationError('سبد خریدی با این آیدی موجود نیست')
+        
+        return cart_id
+
+    def save(self, **kwargs):
+        with transaction.atomic():
+            data = self.validated_data
+
+            cart_id = data['cart_id']
+            cart_obj = models.Cart.objects.get(id=cart_id)
+
+            user_id = self.context['user_id']
+
+            order = models.Order(
+                user_id=user_id,
+                full_name_recipient=data['full_name_recipient'],
+                mobile_recipient=data['mobile_recipient'],
+                email_recipient=data['email_recipient'],
+                province=data['province'],
+                city=data['city'],
+                mantaghe=data['mantaghe'],
+                mahalle=data['mahalle'],
+                address=data['address'],
+                pelaak=data['pelaak'],
+                vaahed=data['vaahed'],
+                post_code=data['post_code'],
+                referrer_code=data['referrer_code'],
+                tracking_code=data['tracking_code'],
+            )
+            order.save()
+
+            cart_items = models.CartItem.objects.select_related('product__base_product').filter(cart_id=cart_id)
+
+            list_of_order_items = [
+                models.OrderItem(
+                    order_id=order.pk,
+                    product_id=cart_item.product_id,
+                    purchased_price=cart_item.product.unit_price,
+                    quantity=cart_item.quantity
+                ) for cart_item in cart_items
+            ]
+
+            # for item in cart_items:
+            #     order_item = models.OrderItem(
+            #         order_id=order.pk,
+            #         product_id=item.product_id,
+            #         purchased_price=item.product.unit_price,
+            #         quantity=item.quantity
+            #     )
+            #     list_of_order_items.append(order_item)
+
+            models.OrderItem.objects.bulk_create(list_of_order_items)
+
+            self.instance = order
+
+            return order
+
+        # cart_obj.objects.delete()
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.OrderItem
+        fields = ['product', 'purchased_price', 'quantity']
+
+
+class ResponseCreateOrderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Order
+        fields = ['datetime_created', 'tracking_code']
+        read_only_fields = ['tracking_code']
+        
+
 
 class ProductCommentSerializer(serializers.ModelSerializer):
     class Meta:

@@ -6,6 +6,8 @@ from django.db.models import Prefetch
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.response import Response
+from rest_framework import status
 
 from store import models
 
@@ -138,3 +140,22 @@ class CartItemViewSet(ModelViewSet):
             'images': models.ProductImage.objects.all(),
             'cart_pk': self.kwargs['cart_pk'],
         }
+    
+
+class CreateOrderApiView(generics.CreateAPIView):
+    queryset = models.Order.objects.all().prefetch_related(
+        Prefetch(
+            'items',
+            queryset=models.OrderItem.objects.select_related('product')
+        )
+    )
+    serializer_class = serializers.CreateOrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        create_order_serializer = serializers.CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.pk})
+        create_order_serializer.is_valid(raise_exception=True)
+        order = create_order_serializer.save()
+        print(order)
+        serializer = serializers.ResponseCreateOrderSerializer(order)
+        return Response(serializer.data)

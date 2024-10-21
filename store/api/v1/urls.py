@@ -29,5 +29,6 @@ urlpatterns = [
         views.ListSimmilarProductViewSet.as_view(),
         name='list_similar_product'
     ),
+    path('create/order/', views.CreateOrderApiView.as_view(), name='create_order')
 ] + router.urls + cart_item_router.urls
 
