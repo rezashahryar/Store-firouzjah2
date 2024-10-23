@@ -348,7 +348,7 @@ class Order(models.Model):
 
     tracking_code = models.CharField(max_length=25)
 
-    status = models.CharField(max_length=2, choices=OrderStatus.choices)
+    status = models.CharField(max_length=2, choices=OrderStatus.choices, default=OrderStatus.CURRENT_ORDERS)
 
     datetime_created = models.DateTimeField(auto_now_add=True)
 

@@ -1,8 +1,28 @@
 from rest_framework import serializers
 
 from panel import models
+from store import models as store_models
 
 # create your serializers here
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_code = serializers.SerializerMethodField()
+
+    class Meta:
+        model = store_models.OrderItem
+        fields = ['product_code']
+
+    def get_product_code(self, order_item):
+        return order_item.product.base_product.product_code
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+
+    class Meta:
+        model = store_models.Order
+        fields = ['tracking_code', 'items']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
