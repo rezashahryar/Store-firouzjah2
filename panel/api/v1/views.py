@@ -17,6 +17,7 @@ from store import models as store_models
 
 from . import serializers
 from .filters import OrderFilter
+from .permissions import HasStore
 
 # create your views here
 
@@ -79,6 +80,70 @@ class OrderViewSet(mixins.RetrieveModelMixin,
             response = HttpResponse(open("all_orders.xlsx", 'rb').read())
             response['Content-Type'] = 'text/plain'
             response['Content-Disposition'] = 'attachment; filename=all_orders.xlsx'
+            return response
+        except Exception as e:
+            return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, permission_classes=[IsAdminUser], methods=['GET'])
+    def export_to_excel_current_orders(self, request):
+        try:
+            all_staff = store_models.Order.objects.filter(status=store_models.Order.OrderStatus.CURRENT_ORDERS)
+            # generate excel file
+            df = pd.DataFrame.from_records(all_staff.values())
+            df['datetime_created'] = df['datetime_created'].apply(lambda a: pd.to_datetime(a).date()) 
+            df.to_excel('current_orders.xlsx', index=False)
+            # process to download file
+            response = HttpResponse(open("current_orders.xlsx", 'rb').read())
+            response['Content-Type'] = 'text/plain'
+            response['Content-Disposition'] = 'attachment; filename=current_orders.xlsx'
+            return response
+        except Exception as e:
+            return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, permission_classes=[IsAdminUser], methods=['GET'])
+    def export_to_excel_delivered_orders(self, request):
+        try:
+            all_staff = store_models.Order.objects.filter(status=store_models.Order.OrderStatus.ORDERS_DELIVERED)
+            # generate excel file
+            df = pd.DataFrame.from_records(all_staff.values())
+            df['datetime_created'] = df['datetime_created'].apply(lambda a: pd.to_datetime(a).date()) 
+            df.to_excel('delivered_orders.xlsx', index=False)
+            # process to download file
+            response = HttpResponse(open("delivered_orders.xlsx", 'rb').read())
+            response['Content-Type'] = 'text/plain'
+            response['Content-Disposition'] = 'attachment; filename=delivered_orders.xlsx'
+            return response
+        except Exception as e:
+            return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, permission_classes=[IsAdminUser], methods=['GET'])
+    def export_to_excel_return_orders(self, request):
+        try:
+            all_staff = store_models.Order.objects.filter(status=store_models.Order.OrderStatus.RETURN_ORDERS)
+            # generate excel file
+            df = pd.DataFrame.from_records(all_staff.values())
+            df['datetime_created'] = df['datetime_created'].apply(lambda a: pd.to_datetime(a).date()) 
+            df.to_excel('return_orders.xlsx', index=False)
+            # process to download file
+            response = HttpResponse(open("return_orders.xlsx", 'rb').read())
+            response['Content-Type'] = 'text/plain'
+            response['Content-Disposition'] = 'attachment; filename=return_orders.xlsx'
+            return response
+        except Exception as e:
+            return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, permission_classes=[IsAdminUser], methods=['GET'])
+    def export_to_excel_canceled_orders(self, request):
+        try:
+            all_staff = store_models.Order.objects.filter(status=store_models.Order.OrderStatus.CANCELED_ORDERS)
+            # generate excel file
+            df = pd.DataFrame.from_records(all_staff.values())
+            df['datetime_created'] = df['datetime_created'].apply(lambda a: pd.to_datetime(a).date()) 
+            df.to_excel('canceled_orders.xlsx', index=False)
+            # process to download file
+            response = HttpResponse(open("canceled_orders.xlsx", 'rb').read())
+            response['Content-Type'] = 'text/plain'
+            response['Content-Disposition'] = 'attachment; filename=canceled_orders.xlsx'
             return response
         except Exception as e:
             return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
