@@ -11,13 +11,16 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth import get_user_model
 
+from core.models import User
 from panel import models
 from store import models as store_models
 
 from . import serializers
 from .filters import OrderFilter
 from .permissions import HasStore
+from panel.api.v1 import permissions
 
 # create your views here
 
@@ -147,3 +150,37 @@ class OrderViewSet(mixins.RetrieveModelMixin,
             return response
         except Exception as e:
             return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class UserViewSet(ModelViewSet):
+    queryset = get_user_model().objects.all()
+    serializer_class = serializers.ListUserSerializer
+
+    @action(detail=False, permission_classes=[IsAdminUser])
+    def export_to_excel_all_users(self, request):
+        try:
+            all_users = User.objects.all()
+            # generate excel file
+            df = pd.DataFrame.from_records(all_users.values())
+            df['date_joined'] = df['date_joined'].apply(lambda a: pd.to_datetime(a).date())
+            df['last_login'] = df['last_login'].apply(lambda a: pd.to_datetime(a).date())
+            df.to_excel('all_users.xlsx', index=False)
+            # process to download file
+            response = HttpResponse(open("all_users.xlsx", 'rb').read())
+            response['Content-Type'] = 'text/plain'
+            response['Content-Disposition'] = 'attachment; filename=all_users.xlsx'
+            return response
+        except Exception as e:
+            return Response({'error_message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class ContractApiView(generics.RetrieveUpdateAPIView):
+    serializer_class = serializers.ContractSerializer
+
+    def get_object(self):
+        return models.Contract.objects.get(pk=1)
+        
+
+class CreateBaseProductApiView(generics.CreateAPIView):
+    serializer_class = serializers.CreateBaseProductSerializer
+    permission_classes = [IsAuthenticated, HasStore]

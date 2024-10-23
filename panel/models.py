@@ -144,3 +144,10 @@ class FeeForSellingProduct(models.Model):
     product_type = models.ForeignKey('store.ProductType', on_delete=models.CASCADE, related_name='fees')
     
     fee_percent = models.IntegerField()
+
+
+class Contract(models.Model):
+    text = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

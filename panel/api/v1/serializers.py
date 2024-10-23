@@ -1,9 +1,31 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
 from panel import models
 from store import models as store_models
 
 # create your serializers here
+
+
+class ListUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['pk', 'email', 'date_joined']
+
+
+class ContractSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Contract
+        fields = ['text']
+
+
+class CreateBaseProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.BaseProduct
+        fields = [
+            'category', 'sub_category', 'product_type', 'title_farsi', 'title_english',
+            'authenticity', 'warranty', 'shiping_method',
+        ]
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -14,7 +36,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['product_code']
 
     def get_product_code(self, order_item):
-        return order_item.product.base_product.product_code
+        return order_item.product.product_code
 
 
 class OrderSerializer(serializers.ModelSerializer):

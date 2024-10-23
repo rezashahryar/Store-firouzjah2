@@ -83,7 +83,7 @@ class BaseProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BaseProduct
         fields = [
-            'id', 'store', 'category', 'sub_category', 'title_farsi', 'title_english', 'product_code',
+            'id', 'store', 'category', 'sub_category', 'title_farsi', 'title_english',
             'images', 'properties', 'comments'
         ]
 
@@ -103,7 +103,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = models.Product
         fields = [
             'id', 'base_product', 'size', 'color', 'inventory', 'unit', 'unit_price', 'discount_percent',
-            'start_discount_datetime', 'end_discount_datetime'
+            'product_code', 'start_discount_datetime', 'end_discount_datetime'
         ]
 
 

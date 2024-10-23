@@ -10,6 +10,11 @@ media/
 static_files/
 all_orders.xlsx
 all_staffs.xlsx
+delivered_orders.xlsx
+all_users.xlsx
+return_orders.xlsx
+canceled_orders.xlsx
+current_orders.xlsx
 
 # Distribution / packaging
 .Python

@@ -1,4 +1,7 @@
+import random
+
 from uuid import uuid4
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_integer
@@ -27,6 +30,15 @@ class Mantaghe(models.Model):
 
     def __str__(self) -> str:
         return self.name
+    
+
+def generate_store_code():
+    while True:
+        code = random.randint(100000, 999999)
+
+        if Store.objects.filter(store_code=code).exists():
+            continue
+        return code
 
 
 class Store(models.Model):
@@ -34,6 +46,8 @@ class Store(models.Model):
     class StoreType(models.TextChoices):
         HAGHIGHY = 'ha', _('حقیقی')
         HOGHOUGHY = 'ho', _('حقوقی')
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='store', null=True)
 
     store_name = models.CharField(max_length=255)
 
@@ -50,7 +64,7 @@ class Store(models.Model):
     address = models.TextField()
     post_code = models.CharField(max_length=10, validators=[validate_integer])
 
-    store_code = models.CharField(max_length=10, null=True)
+    store_code = models.CharField(max_length=10, unique=True, default=generate_store_code)
     store_type = models.CharField(max_length=2, choices=StoreType.choices)
 
     def __str__(self) -> str:
@@ -89,7 +103,7 @@ class ProductProperties(models.Model):
 class ProductCategory(models.Model):
     properties = models.ManyToManyField(ProductProperties, related_name='categories')
     name = models.CharField(max_length=255)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
     image = models.ImageField(upload_to='store/product-category-images/')
 
     def __str__(self) -> str:
@@ -99,7 +113,7 @@ class ProductCategory(models.Model):
 class ProductSubCategory(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='sub_categories')
     name = models.CharField(max_length=255)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
     image = models.ImageField(upload_to='store/product-subcategory-images/')
 
     def __str__(self) -> str:
@@ -139,7 +153,6 @@ class BaseProduct(models.Model):
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
     description = models.TextField()
-    product_code = models.CharField(max_length=6, unique=True)
     authenticity = models.CharField(max_length=3, choices=ProductAuthenticity.choices, default=ProductAuthenticity.ORIGINAL)
     warranty = models.CharField(max_length=2, choices=ProductWarranty.choices, default=ProductWarranty.HAS)
     shiping_method = models.CharField(max_length=2, choices=ShipingMethod.choices)
@@ -189,6 +202,15 @@ class ProductColor(models.Model):
         return self.name
     
 
+def generate_product_code():
+    while True:
+        code = random.randint(100000, 999999)
+
+        if Product.objects.filter(product_code=code).exists():
+            continue
+        return code
+    
+
 class Product(models.Model):
 
     class ProductUnit(models.TextChoices):
@@ -203,8 +225,9 @@ class Product(models.Model):
 
     size = models.CharField(max_length=4, choices=ProductSize.choices)
     color = models.ForeignKey(ProductColor, on_delete=models.CASCADE, related_name='products', null=True)
+    product_code = models.CharField(max_length=6, unique=True, default=generate_product_code)
     inventory = models.PositiveIntegerField()
-    slug = models.SlugField(null=True)
+    slug = models.SlugField(unique=True)
     unit = models.CharField(max_length=1, choices=ProductUnit.choices)
     unit_price = models.IntegerField()
 
@@ -346,7 +369,7 @@ class Order(models.Model):
     post_code = models.CharField(max_length=10, validators=[validate_integer])
     referrer_code = models.CharField(max_length=255)
 
-    tracking_code = models.CharField(max_length=25)
+    tracking_code = models.CharField(max_length=25, unique=True)
 
     status = models.CharField(max_length=2, choices=OrderStatus.choices, default=OrderStatus.CURRENT_ORDERS)
 
