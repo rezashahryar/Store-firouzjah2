@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models.query import QuerySet
+from django.http import HttpRequest
 
 from . import models
 
@@ -176,10 +178,14 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 class OrderCustomerInline(admin.TabularInline):
     model = models.Order
-    fields = ['full_name_recipient']
+    fields = ['full_name_recipient', 'mobile_recipient', 'tracking_code', 'status']
     extra = 1
 
 
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
+    list_display = ['user']
     inlines = [OrderCustomerInline]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).select_related('user')

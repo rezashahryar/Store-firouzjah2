@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_integer
 from django.conf import settings
+from django.db import IntegrityError
 
 from .model_fields import ProductSize
 # Create your models here.
@@ -34,11 +35,11 @@ class Mantaghe(models.Model):
 
 def generate_store_code():
     while True:
-        code = random.randint(100000, 999999)
-
-        if Store.objects.filter(store_code=code).exists():
+        try:
+            code = random.randint(100000, 999999)
+            return code
+        except IntegrityError:
             continue
-        return code
 
 
 class Store(models.Model):
@@ -351,16 +352,16 @@ class Customer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='customer')
 
     def __str__(self) -> str:
-        return self.user.username
+        return str(self.user.username)
     
 
 def generate_order_tracking_code():
     while True:
-        code = random.randint(100000, 999999)
-
-        if Order.objects.filter(tracking_code=code).exists():
+        try:
+            code = random.randint(100000, 999999)
+            return code
+        except IntegrityError:
             continue
-        return code
 
 
 class Order(models.Model):
@@ -393,7 +394,7 @@ class Order(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.full_name_recipient
+        return f'order_id={self.pk}'
     
 
 class OrderItem(models.Model):
