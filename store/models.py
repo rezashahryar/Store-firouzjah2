@@ -246,6 +246,7 @@ class Product(models.Model):
     product_status = models.CharField(max_length=2, choices=ProductStatus.choices, default=ProductStatus.WAITING)
     active_status = models.BooleanField(default=False)
 
+    reviewer = models.ForeignKey('panel.Staff', on_delete=models.CASCADE, related_name='reviewers', null=True, blank=True)
     reason = models.TextField(
         null=True,
         blank=True,

@@ -99,8 +99,11 @@ class BaseProductAdmin(admin.ModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['title', 'unit_price', 'size', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode']
-    list_editable = ['discount_percent']
+    list_display = [
+        'title', 'unit_price', 'size', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode',
+        'product_status', 'active_status'
+    ]
+    list_editable = ['discount_percent', 'product_status', 'active_status']
     exclude = ['slug']
     list_select_related = ['base_product']
 
@@ -158,7 +161,12 @@ class OrderItemTabularInline(admin.TabularInline):
 
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
+    list_display = ['email', 'status']
+    list_editable = ['status']
     inlines = [OrderItemTabularInline]
+
+    def email(self, obj):
+        return obj.user.email
 
 
 @admin.register(models.OrderItem)

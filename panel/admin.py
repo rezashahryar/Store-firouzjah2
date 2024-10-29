@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django_summernote.admin import SummernoteModelAdmin
 
 from . import models
 
@@ -16,13 +17,13 @@ class FeeForSellingProductAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.Page)
-class PageAdmin(admin.ModelAdmin):
-    ...
+class PageAdmin(SummernoteModelAdmin):
+    summernote_fields = 'text'
 
 
 @admin.register(models.CommonQuestion)
-class CommonQuestionAdmin(admin.ModelAdmin):
-    ...
+class CommonQuestionAdmin(SummernoteModelAdmin):
+    summernote_fields = 'text'
 
 
 @admin.register(models.Profile)
@@ -46,7 +47,8 @@ class RequestPhotographyServiceAdmin(admin.ModelAdmin):
 
 @admin.register(models.Staff)
 class StaffAdmin(admin.ModelAdmin):
-    ...
+    list_display = ['full_name', 'gender', 'mobile_num', 'email', 'birth_date', 'datetime_created', 'status']
+    exclude = ['reviewer', 'reason']
 
 
 @admin.register(models.CareerRecords)

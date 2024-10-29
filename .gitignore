@@ -15,6 +15,8 @@ all_users.xlsx
 return_orders.xlsx
 canceled_orders.xlsx
 current_orders.xlsx
+approved_staff.xlsx
+all_staff.xlsx
 
 # Distribution / packaging
 .Python
