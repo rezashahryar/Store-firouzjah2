@@ -166,9 +166,14 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemTabularInline]
 
     def email(self, obj):
-        return obj.user.email
+        return obj.customer.user.email
 
 
 @admin.register(models.OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.Customer)
+class CustomerAdmin(admin.ModelAdmin):
     ...

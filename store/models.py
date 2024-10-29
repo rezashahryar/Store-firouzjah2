@@ -347,6 +347,13 @@ class CartItem(models.Model):
         unique_together = [['cart', 'product']]
 
 
+class Customer(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='customer')
+
+    def __str__(self) -> str:
+        return self.user.username
+
+
 class Order(models.Model):
 
     class OrderStatus(models.TextChoices):
@@ -355,7 +362,7 @@ class Order(models.Model):
         RETURN_ORDERS = 'or', _('مرجوع شده')
         CANCELED_ORDERS = 'oc', _('لغو شده')
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
     
     full_name_recipient = models.CharField(max_length=255)
     mobile_recipient = models.CharField(max_length=11, validators=[validate_integer])
@@ -377,7 +384,7 @@ class Order(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user.email
+        return self.customer.user.email
     
 
 class OrderItem(models.Model):

@@ -297,8 +297,10 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
             user_id = self.context['user_id']
 
+            customer_obj = models.Customer.objects.get(user_id=user_id)
+
             order = models.Order(
-                user_id=user_id,
+                customer_id=customer_obj.pk,
                 full_name_recipient=data['full_name_recipient'],
                 mobile_recipient=data['mobile_recipient'],
                 email_recipient=data['email_recipient'],
