@@ -352,6 +352,15 @@ class Customer(models.Model):
 
     def __str__(self) -> str:
         return self.user.username
+    
+
+def generate_order_tracking_code():
+    while True:
+        code = random.randint(100000, 999999)
+
+        if Order.objects.filter(tracking_code=code).exists():
+            continue
+        return code
 
 
 class Order(models.Model):
@@ -377,14 +386,14 @@ class Order(models.Model):
     post_code = models.CharField(max_length=10, validators=[validate_integer])
     referrer_code = models.CharField(max_length=255)
 
-    tracking_code = models.CharField(max_length=25, unique=True)
+    tracking_code = models.CharField(max_length=25, unique=True, default=generate_order_tracking_code)
 
     status = models.CharField(max_length=2, choices=OrderStatus.choices, default=OrderStatus.CURRENT_ORDERS)
 
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.customer.user.email
+        return self.full_name_recipient
     
 
 class OrderItem(models.Model):

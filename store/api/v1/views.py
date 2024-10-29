@@ -156,6 +156,5 @@ class CreateOrderApiView(generics.CreateAPIView):
         create_order_serializer = serializers.CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.pk})
         create_order_serializer.is_valid(raise_exception=True)
         order = create_order_serializer.save()
-        print(order)
         serializer = serializers.ResponseCreateOrderSerializer(order)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

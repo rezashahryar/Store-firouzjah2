@@ -275,8 +275,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         model = models.Order
         fields = [
             'id', 'cart_id', 'full_name_recipient', 'mobile_recipient', 'email_recipient', 'province', 'city', 'mantaghe',
-            'mahalle', 'address', 'pelaak', 'vaahed', 'post_code', 'referrer_code', 'tracking_code',
-            'datetime_created'
+            'mahalle', 'address', 'pelaak', 'vaahed', 'post_code', 'referrer_code', 'datetime_created'
         ]
 
     def validate_cart_id(self, cart_id):
@@ -313,7 +312,6 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 vaahed=data['vaahed'],
                 post_code=data['post_code'],
                 referrer_code=data['referrer_code'],
-                tracking_code=data['tracking_code'],
             )
             order.save()
 

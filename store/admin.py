@@ -174,6 +174,12 @@ class OrderItemAdmin(admin.ModelAdmin):
     ...
 
 
+class OrderCustomerInline(admin.TabularInline):
+    model = models.Order
+    fields = ['full_name_recipient']
+    extra = 1
+
+
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    ...
+    inlines = [OrderCustomerInline]
