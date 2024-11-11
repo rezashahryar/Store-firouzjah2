@@ -47,10 +47,20 @@ class RequestPhotographyServiceAdmin(admin.ModelAdmin):
 
 @admin.register(models.Staff)
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'gender', 'mobile_num', 'email', 'birth_date', 'datetime_created', 'status']
-    exclude = ['reviewer', 'reason']
+    list_display = ['full_name', 'user', 'gender', 'mobile_num', 'email', 'birth_date', 'datetime_created', 'status']
+    readonly_fields = ['reviewer', 'reason']
 
 
 @admin.register(models.CareerRecords)
 class CareerRecordsAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.ProductItem)
+class ProductItemAdmin(admin.ModelAdmin):
+    ...
+
+
+@admin.register(models.SetProductItem)
+class SetProductItemAdmin(admin.ModelAdmin):
     ...

@@ -1,14 +1,14 @@
 import random
 
-from uuid import uuid4
+from uuid import uuid1, uuid4
 
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator, validate_integer
 from django.conf import settings
 from django.db import IntegrityError
 
-from .model_fields import ProductSize
 # Create your models here.
 
 
@@ -104,7 +104,7 @@ class ProductProperties(models.Model):
 class ProductCategory(models.Model):
     properties = models.ManyToManyField(ProductProperties, related_name='categories')
     name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, default=uuid1)
     image = models.ImageField(upload_to='store/product-category-images/')
 
     def __str__(self) -> str:
@@ -114,7 +114,7 @@ class ProductCategory(models.Model):
 class ProductSubCategory(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='sub_categories')
     name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, default=uuid1)
     image = models.ImageField(upload_to='store/product-subcategory-images/')
 
     def __str__(self) -> str:
@@ -147,15 +147,15 @@ class BaseProduct(models.Model):
         BAARBARI = 'ba', _('باربری')
         PEYK_MOTORY = 'mo', _('پیک موتوری')
 
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products', null=True)
-    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products', null=True)
-    sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products', null=True)
-    product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE, related_name='products', null=True)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
+    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products')
+    sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products')
+    product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE, related_name='products')
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
     description = models.TextField()
-    authenticity = models.CharField(max_length=3, choices=ProductAuthenticity.choices, default=ProductAuthenticity.ORIGINAL)
-    warranty = models.CharField(max_length=2, choices=ProductWarranty.choices, default=ProductWarranty.HAS)
+    authenticity = models.CharField(max_length=3, choices=ProductAuthenticity.choices)
+    warranty = models.CharField(max_length=2, choices=ProductWarranty.choices)
     shiping_method = models.CharField(max_length=2, choices=ShipingMethod.choices)
 
     def __str__(self) -> str:
@@ -205,11 +205,11 @@ class ProductColor(models.Model):
 
 def generate_product_code():
     while True:
-        code = random.randint(100000, 999999)
-
-        if Product.objects.filter(product_code=code).exists():
+        try:
+            code = random.randint(100000, 999999)
+            return code
+        except IntegrityError:
             continue
-        return code
     
 
 class Product(models.Model):
@@ -223,23 +223,20 @@ class Product(models.Model):
         NOT_APPROVED = 'na', _('تایید نشده')
 
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='products')
-
-    size = models.CharField(max_length=4, choices=ProductSize.choices)
-    color = models.ForeignKey(ProductColor, on_delete=models.CASCADE, related_name='products', null=True)
     product_code = models.CharField(max_length=6, unique=True, default=generate_product_code)
     inventory = models.PositiveIntegerField()
-    slug = models.SlugField(unique=True)
-    unit = models.CharField(max_length=1, choices=ProductUnit.choices)
+    slug = models.SlugField(unique=True, null=True, blank=True)
+    unit = models.CharField(max_length=1, choices=ProductUnit.choices, null=True, blank=True)
     unit_price = models.IntegerField()
 
     discount_percent = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], null=True, blank=True)
     start_discount_datetime = models.DateTimeField(null=True, blank=True)
     end_discount_datetime = models.DateTimeField(null=True, blank=True)
 
-    length_package = models.IntegerField(null=True, blank=True)
-    width_package = models.IntegerField(null=True, blank=True)
-    height_package = models.IntegerField(null=True, blank=True)
-    weight_package = models.IntegerField(null=True, blank=True)
+    length_package = models.IntegerField()
+    width_package = models.IntegerField()
+    height_package = models.IntegerField()
+    weight_package = models.IntegerField()
 
     shenaase_kaala = models.CharField(max_length=25)
     barcode = models.CharField(max_length=25)
@@ -257,15 +254,22 @@ class Product(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_modified = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        self.slug = self.generate_unique_slug(self.base_product.pk, self.shenaase_kaala, self.barcode)
-        return super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.slug = self.generate_unique_slug(self.base_product.pk, self.shenaase_kaala, self.barcode)
+    #     return super().save(*args, **kwargs)
     
     def generate_unique_slug(self, value1, value2, value3):
         return f'{value1}--{value2}--{value3}'
     
     def __str__(self) -> str:
         return self.base_product.title_farsi
+    
+    @property
+    def cover(self):
+        try:
+            return self.base_product.images.get(id=self.pk, is_cover=True)
+        except ProductImage.DoesNotExist:
+            return None
 
 
 class ProductImage(models.Model):
@@ -275,6 +279,11 @@ class ProductImage(models.Model):
 
     def __str__(self) -> str:
         return self.base_product.title_farsi
+    
+    def clean(self):
+        if ProductImage.objects.filter(base_product_id=self.base_product.pk, is_cover=True) and self.is_cover:
+            raise ValidationError('از قبل موجود است is_cover=True عکس برای این محصول با')
+        return super().clean()
     
 
 class ReportProduct(models.Model):

@@ -224,6 +224,11 @@ class ProductBoxSettingPermission(permissions.BasePermission):
 class EditProfilePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(request.user.has_perm('panel.edit_profile'))
+    
+
+class FeeForSellingPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user.is_staff and request.user.has_perm('panel.fee_for_selling'))
 
 
 class IsStaff(permissions.BasePermission):

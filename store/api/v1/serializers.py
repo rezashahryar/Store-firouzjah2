@@ -3,9 +3,16 @@ from decimal import Decimal
 from rest_framework import serializers
 from django.db import transaction
 
+from panel.models import SetProductItem
 from store import models
 
 # create your serializers here
+
+
+class NewProductDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product
+        fields = ['id']
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
@@ -94,16 +101,24 @@ class ProductColorSerializer(serializers.ModelSerializer):
         fields = ['name', 'code_color']
 
 
+class SetProductItemSerializer(serializers.ModelSerializer):
+    item = serializers.StringRelatedField()
+
+    class Meta:
+        model = SetProductItem
+        fields = ['item', 'value']
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
+    items = SetProductItemSerializer(many=True)
     base_product = BaseProductDetailSerializer()
     unit = serializers.CharField(source='get_unit_display')
-    color = ProductColorSerializer()
     
     class Meta:
         model = models.Product
         fields = [
-            'id', 'base_product', 'size', 'color', 'inventory', 'unit', 'unit_price', 'discount_percent',
-            'product_code', 'start_discount_datetime', 'end_discount_datetime'
+            'id', 'base_product', 'inventory', 'unit', 'unit_price', 'discount_percent',
+            'start_discount_datetime', 'end_discount_datetime', 'items'
         ]
 
 

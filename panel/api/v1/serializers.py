@@ -19,16 +19,24 @@ class StoreSerializer(serializers.ModelSerializer):
         ]
 
     def get_user(self, obj):
-        return obj.user.profile.full_name
+        if obj.user.profile.full_name:
+            return obj.user.profile.full_name
+        return str(obj.user)
 
 
 class BaseProductSerializer(serializers.ModelSerializer):
     store = StoreSerializer()
+    category = serializers.StringRelatedField()
+    sub_category = serializers.StringRelatedField()
+    product_type = serializers.StringRelatedField()
+    authenticity = serializers.CharField(source='get_authenticity_display')
+    warranty = serializers.CharField(source='get_warranty_display')
 
     class Meta:
         model = store_models.BaseProduct
         fields = [
-            'id', 'store'
+            'id', 'store', 'category', 'sub_category', 'product_type', 'title_farsi', 'title_english',
+            'authenticity', 'warranty'
         ]
 
 
@@ -44,38 +52,31 @@ class ReviewProductSerializer(serializers.ModelSerializer):
         fields = ['reviewer', 'reason']
 
 
+class ProductItemDetailSerializer(serializers.ModelSerializer):
+    item = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.SetProductItem
+        fields = ['item', 'value']
+
+
 class ProductSerializer(serializers.ModelSerializer):
+    items = ProductItemDetailSerializer(many=True)
     product_status = serializers.CharField(source='get_product_status_display')
     base_product = BaseProductSerializer()
-    category = serializers.CharField(source='base_product.category')
-    sub_category = serializers.CharField(source='base_product.sub_category')
-    product_type = serializers.CharField(source='base_product.product_type')
-    title_farsi = serializers.CharField(source='base_product.title_farsi')
-    title_english = serializers.CharField(source='base_product.title_english')
-    authenticity = serializers.CharField(source='base_product.get_authenticity_display')
-    warranty = serializers.CharField(source='base_product.get_warranty_display')
+    reviewer = serializers.StringRelatedField()
+    cover = serializers.SerializerMethodField()
 
     class Meta:
         model = store_models.Product
         fields = [
-            'id', 'base_product', 'category', 'sub_category', 'product_type', 'title_farsi', 'title_english',
-            'inventory', 'product_code', 'unit_price', 'discount_percent', 'start_discount_datetime',
-            'end_discount_datetime', 'authenticity', 'warranty', 'shenaase_kaala', 'product_status', 'active_status',
-            'datetime_created',
+            'id', 'base_product', 'inventory', 'unit_price', 'discount_percent', 'start_discount_datetime',
+            'end_discount_datetime', 'shenaase_kaala', 'product_code', 'product_status', 'active_status',
+            'datetime_created', 'datetime_modified', 'items', 'reason', 'reviewer', 'cover'
         ]
 
-    def to_representation(self, instance):
-        context = super().to_representation(instance)
-
-        images = self.context['images']
-        for img in images:
-            if img.base_product_id == instance.base_product.pk and img.is_cover:
-                img_obj = img
-                context['cover'] = ProductImageSerializer(img_obj).data
-            elif not img.base_product_id == instance.base_product.pk and img.is_cover:
-                continue
-
-        return context
+    def get_cover(self, obj):
+        return ProductImageSerializer(obj.cover).data
 
 
 class UpdateStaffSerializer(serializers.ModelSerializer):
@@ -165,24 +166,180 @@ class ContractSerializer(serializers.ModelSerializer):
         fields = ['text']
 
 
+class CreateBaseProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.ProductCategory
+        fields = ['name']
+
+
+class CreateBaseProductSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.ProductSubCategory
+        fields = ['name']
+
+
+class CreateBaseProductProductTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.ProductType
+        fields = ['title']
+
+
 class CreateBaseProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = store_models.BaseProduct
         fields = [
-            'category', 'sub_category', 'product_type', 'title_farsi', 'title_english',
+            'id', 'category', 'sub_category', 'product_type', 'title_farsi', 'title_english',
             'authenticity', 'warranty', 'shiping_method',
         ]
+    
+    def to_representation(self, instance):
+        context = super().to_representation(instance)
+        context['category'] = CreateBaseProductCategorySerializer(instance.category).data
+        context['sub_category'] = CreateBaseProductSubCategorySerializer(instance.sub_category).data
+        context['product_type'] = CreateBaseProductProductTypeSerializer(instance.product_type).data
+        return context
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context['request']
+        if request.user.is_staff:
+            fields['store'] = serializers.PrimaryKeyRelatedField(queryset=store_models.Store.objects.all())
+        return fields
+
+    def create(self, validated_data):
+        return store_models.BaseProduct.objects.create(
+            store_id=self.context['store_pk'],
+            **validated_data
+        )
+
+
+class ProductItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductItem
+        fields = ['id', 'category', 'sub_category', 'name', 'status']
+
+    def validate(self, attrs):
+        category = attrs['category']
+        sub_category = attrs['sub_category']
+        name = attrs['name']
+        if models.ProductItem.objects.filter(category=category,sub_category=sub_category,name=name).exists():
+            raise serializers.ValidationError('موجود')
+        return attrs
+
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        product_obj = store_models.Product.objects.get(id=product_id)
+        return models.ProductItem.objects.create(
+            product_type_id=product_obj.base_product.product_type.pk,
+            **validated_data
+        )
+
+
+class CreateProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.Product
+        fields = [
+            'id', 'inventory', 'unit_price', 'discount_percent', 'start_discount_datetime', 'end_discount_datetime',
+            'shenaase_kaala', 'barcode', 'length_package', 'width_package', 'height_package', 'weight_package',
+        ]
+
+    # def validate(self, attrs):
+    #     request = self.context['request']
+    #     if isinstance(request.data, list):
+    #         base_product_id = request.data[0]['base_product_id']
+    #         try:
+    #             base_product_obj = store_models.BaseProduct.objects.get(id=base_product_id)
+    #         except store_models.BaseProduct.DoesNotExist:
+    #             raise serializers.ValidationError('ارور')
+    #     base_product_id = request.data['base_product_id']
+    #     try:
+    #         base_product_obj = store_models.BaseProduct.objects.get(id=base_product_id)
+    #     except store_models.BaseProduct.DoesNotExist:
+    #         raise serializers.ValidationError('ارور')
+    #     return attrs
+
+    def create(self, validated_data):
+        request = self.context['request']
+        product = store_models.Product.objects.create(
+            base_product_id=request.data[0]['base_product_id'],
+            shenaase_kaala=validated_data['shenaase_kaala'],
+            barcode=validated_data['barcode'],
+            inventory=validated_data['inventory']
+        )
+        validated_data.pop('shenaase_kaala')
+        validated_data.pop('barcode')
+        validated_data.pop('inventory')
+        list_product_items = []
+        for key in validated_data:
+            item = models.ProductItem.objects.get(name=key)
+            models.SetProductItem.objects.create(
+                product_id=product.pk,
+                item_id=item.pk,
+                value=validated_data[key],
+            )
+
+        return product
+    
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context['request']
+        base_product_id = request.data[0]['base_product_id']
+        try:
+            base_product_obj = store_models.BaseProduct.objects.get(id=base_product_id)
+        except store_models.BaseProduct.DoesNotExist:
+            raise serializers.ValidationError('ارور')
+        items = models.ProductItem.objects.filter(product_type_id=base_product_obj.product_type.pk)
+        for item in items:
+            fields[item.name] = serializers.CharField()
+
+        return fields
+
+
+class ProductDetailItemSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = store_models.Product
+        fields = ['title']
+
+    def get_title(self, product):
+        return product.base_product.title_farsi
+    
+
+class SetProductItemFieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductItem
+        fields = ['name']
+
+
+class SetProductItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SetProductItem
+        fields = ['id', 'product', 'item', 'value']
+
+    def validate(self, attrs):
+        if models.SetProductItem.objects.filter(product=attrs['product'], item=attrs['item']).exists():
+            raise serializers.ValidationError('موجود')
+        if attrs['item'].product_type != attrs['product'].base_product.product_type:
+            raise serializers.ValidationError('ارور')
+        return attrs
+    
+    def to_representation(self, instance):
+        context = super().to_representation(instance)
+        context['product'] = ProductDetailItemSerializer(instance.product).data
+        context['item'] = SetProductItemFieldSerializer(instance.item).data
+        return context
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product_code = serializers.SerializerMethodField()
+    # product_code = serializers.SerializerMethodField()
 
     class Meta:
         model = store_models.OrderItem
-        fields = ['product_code']
+        fields = ['id']
 
-    def get_product_code(self, order_item):
-        return order_item.product.product_code
+    # def get_product_code(self, order_item):
+    #     return order_item.product.product_code
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -232,7 +389,71 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
         fields = ['id', 'type', 'main_subject', 'title', 'text']
 
 
-class FeeForSellingProductSerializer(serializers.ModelSerializer):
+class CreateFeeForSellingProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FeeForSellingProduct
         fields = ['id', 'category', 'sub_category', 'product_type', 'fee_percent']
+
+
+class FeeForSellingProductSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField()
+    sub_category = serializers.StringRelatedField()
+    product_type = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.FeeForSellingProduct
+        fields = ['id', 'category', 'sub_category', 'product_type', 'fee_percent']
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context['request']
+        if request.user.is_staff:
+            fields['staff'] = serializers.CharField()
+            fields['datetime_modified'] = serializers.DateTimeField()
+        elif request.user.store:
+            fields['store'] = serializers.CharField()
+        return fields
+
+    def create(self, validated_data):
+        user_id = self.context['user_id']
+        user = User.objects.get(id=user_id)
+
+        fee_obj = models.FeeForSellingProduct(
+            category=validated_data['category'],
+            sub_category=validated_data['sub_category'],
+            product_type=validated_data['product_type'],
+            fee_percent=validated_data['fee_percent'],
+        )
+        if user.is_staff:
+            fee_obj.staff_id = user.staff.pk
+        else:
+            fee_obj.store_id = user.store.pk
+        fee_obj.save()
+
+        return fee_obj
+    
+
+class CreateProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.ProductCategory
+        fields = ['id', 'name', 'slug', 'image']
+        read_only_fields = ['slug']
+
+
+class CreateProductSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.ProductSubCategory
+        fields = ['id', 'category', 'name', 'slug', 'image']
+        read_only_fields = ['slug']
+
+
+class ProductTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.ProductType
+        fields = ['id', 'category', 'sub_category', 'title']
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = store_models.Customer
+        fields = ['user']

@@ -9,6 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework import status
 
+from panel.models import SetProductItem
 from store import models
 
 from . import serializers
@@ -39,7 +40,7 @@ class ProductCategoryListApiView(generics.ListAPIView):
 class ProductViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    GenericViewSet):
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ProductFilter
     ordering_fields = ['discount_percent']
@@ -53,9 +54,9 @@ class ProductViewSet(mixins.RetrieveModelMixin,
 
         if self.action == 'list':
             return queryset.defer(
-                'inventory', 'unit', 'size','length_package', 'width_package', 'height_package',
+                'inventory', 'unit', 'length_package', 'width_package', 'height_package',
                 'weight_package', 'shenaase_kaala', 'barcode', 'product_status', 'active_status',
-                'reason', 'base_product__title_english', 'base_product__product_code',
+                'reason', 'base_product__title_english',
                 'base_product__authenticity', 'base_product__warranty','base_product__shiping_method',
                 'base_product__category__image', 'base_product__category__slug'
             )
@@ -70,7 +71,12 @@ class ProductViewSet(mixins.RetrieveModelMixin,
                     )
                 )
             )
-        ).select_related('color')
+        ).prefetch_related(
+            Prefetch(
+                'items',
+                queryset=SetProductItem.objects.select_related('item')
+            )
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':

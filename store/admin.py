@@ -41,7 +41,7 @@ class MantagheAdmin(admin.ModelAdmin):
 
 @admin.register(models.Store)
 class StoreAdmin(admin.ModelAdmin):
-    ...
+    list_display = ['store_name', 'user', 'store_code', 'store_type']
 
 
 @admin.register(models.HoghoughyStore)
@@ -102,7 +102,7 @@ class BaseProductAdmin(admin.ModelAdmin):
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
-        'title', 'unit_price', 'size', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode',
+        'title', 'unit_price', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode',
         'product_status', 'active_status'
     ]
     list_editable = ['discount_percent', 'product_status', 'active_status']

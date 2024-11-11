@@ -3,7 +3,28 @@ from django.core.validators import validate_integer
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from store import models as store_models
+
 # Create your models here.
+
+
+class ProductItem(models.Model):
+    category = models.ForeignKey(store_models.ProductCategory, on_delete=models.CASCADE, related_name='items')
+    sub_category = models.ForeignKey(store_models.ProductSubCategory, on_delete=models.CASCADE, related_name='items')
+    product_type = models.ForeignKey(store_models.ProductType, on_delete=models.CASCADE, related_name='items')
+    name = models.CharField(max_length=255)
+    # choices = ...
+
+    status = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class SetProductItem(models.Model):
+    product = models.ForeignKey(store_models.Product, on_delete=models.CASCADE, related_name='items')
+    item = models.ForeignKey(ProductItem, on_delete=models.CASCADE, related_name='items')
+    value = models.CharField(max_length=255)
 
 
 class Profile(models.Model):
@@ -11,6 +32,9 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=255)
     mobile = models.CharField(max_length=12, validators=[validate_integer])
     email = models.EmailField(null=True)
+
+    def __str__(self) -> str:
+        return self.full_name
 
 
 class RequestPhotographyService(models.Model):
@@ -147,6 +171,7 @@ class Staff(models.Model):
             ('public_settings', 'public settings'),
             ('product_box_settings', 'product_box_settings'),
             ('edit_profile', 'edit profile'),
+            ('fee_for_selling', 'fee for selling'),
         ]
 
     def __str__(self) -> str:
@@ -201,14 +226,17 @@ class CommonQuestion(models.Model):
     
 
 class FeeForSellingProduct(models.Model):
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='selling_fees', null=True)
-    store = models.ForeignKey('store.Store', on_delete=models.CASCADE, related_name='selling_fees', null=True)
-    
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='selling_fees', null=True, blank=True)
+    store = models.ForeignKey('store.Store', on_delete=models.CASCADE, related_name='selling_fees', null=True, blank=True)
+
     category = models.ForeignKey('store.ProductCategory', on_delete=models.CASCADE, related_name='fees')
     sub_category = models.ForeignKey('store.ProductSubCategory', on_delete=models.CASCADE, related_name='fees')
     product_type = models.ForeignKey('store.ProductType', on_delete=models.CASCADE, related_name='fees')
     
     fee_percent = models.IntegerField()
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
+    datetime_modified = models.DateTimeField(auto_now=True)
 
 
 class Contract(models.Model):

@@ -1,9 +1,9 @@
 import pandas as pd
 
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Prefetch
 
 from core.models import User
 from panel import models
@@ -22,7 +23,10 @@ from store import models as store_models
 
 from . import serializers
 from .filters import OrderFilter
-from .permissions import CommonQuestionsPermission, HasStore, IndexPagePermission, IsStaff, PagePermission
+from .permissions import (
+    AddCategoryPermission, AddProductTypePermission, AddSubCategoryPermission, CommonQuestionsPermission, FeeForSellingPermission, HasStore,
+    IndexPagePermission, IsStaff, PagePermission
+)
 
 # create your views here
 
@@ -72,7 +76,7 @@ class IndexPageApiView(APIView):
         )
     
 
-class ListPermissionStaffApiView(generics.ListAPIView):
+class ListAllPermissionStaffApiView(generics.ListAPIView):
     serializer_class = serializers.PermissionSerializer
 
     def get_queryset(self):
@@ -86,7 +90,11 @@ class StaffViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     queryset = models.Staff.objects.select_related('province').select_related('city') \
         .select_related('mantaghe').select_related('user').all()
-    # permission_classes = [IsAdminUser]
+
+    def get_permissions(self):
+        if self.request.method == 'POST' and self.action == 'create':
+            return [AllowAny]
+        return [IsStaff]
 
     def create(self, request, *args, **kwargs):
         permissions = Permission.objects.filter(id__in=request.data['permissions'])
@@ -193,11 +201,11 @@ class StaffViewSet(ModelViewSet):
 
 class ProfileApiView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.ProfileSerializer
-    permission_classes = [IsStaff, PagePermission]
+    permission_classes = [IsAuthenticated]
     
     def get_object(self):
         user = self.request.user
-        return models.Profile.objects.get(user_id=user.pk)
+        return get_object_or_404(models.Profile, user_id=user.pk)
     
 
 class PageViewSet(ModelViewSet):
@@ -227,18 +235,29 @@ class CommonQuestionViewSet(ModelViewSet):
 
 
 class FeeForSellingProductViewSet(ModelViewSet):
-    queryset = models.FeeForSellingProduct.objects.all()
-    serializer_class = serializers.FeeForSellingProductSerializer
     filter_backends = [SearchFilter]
     search_fields = ['fee_percent', 'product_type', 'category', 'sub_category']
 
-    def get_serializer_context(self):
-        return {'request', self.request}
+    def get_serializer_class(self):
+        if self.request.method == 'POST' and self.action == 'create':
+            return serializers.CreateFeeForSellingProductSerializer
+        return serializers.FeeForSellingProductSerializer
+
+    def get_queryset(self):
+        queryset = models.FeeForSellingProduct.objects.select_related('store').select_related('staff') \
+            .select_related('category').select_related('sub_category').select_related('product_type').all()
+        try:
+            return queryset.filter(store_id=self.request.user.store.pk)
+        except store_models.Store.DoesNotExist:
+            return queryset
     
     def get_permissions(self):
-        if self.request.user.is_staff:
-            return [IsStaff()]
-        return [HasStore()]
+        if self.request.user.is_staff or self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            return [IsAuthenticated(), IsStaff(), FeeForSellingPermission()]
+        return [IsAuthenticated(), HasStore()]
+
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.pk, 'request': self.request}
 
 
 class OrderViewSet(mixins.RetrieveModelMixin,
@@ -362,19 +381,88 @@ class ContractApiView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return models.Contract.objects.get(pk=1)
-        
+
+
+class ListProductItemApiView(generics.ListCreateAPIView):
+    queryset = models.ProductItem.objects.all()
+    serializer_class = serializers.ProductItemSerializer
+
+    def get_serializer_context(self):
+        if self.request.method == 'POST':
+            return {'product_id': self.request.data['product_id']}
+
+
+class SetProductItemApiView(generics.ListCreateAPIView):
+    queryset = models.SetProductItem.objects.select_related('product__base_product').select_related('item').all()
+    serializer_class = serializers.SetProductItemSerializer
+
+    def create(self, request, *args, **kwargs):
+        many = True if isinstance(request.data, list) else False
+        serializer = serializers.SetProductItemSerializer(data=request.data, many=many)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
 
 class CreateBaseProductApiView(generics.CreateAPIView):
     serializer_class = serializers.CreateBaseProductSerializer
-    permission_classes = [IsAuthenticated, HasStore]
+
+    def get(self, request):
+        store_code = get_object_or_404(store_models.Store, user_id=request.user.pk).store_code
+        product_new_code = store_models.generate_product_code()
+
+        return Response({
+            'store_code': store_code,
+            'product_new_code': product_new_code,
+        })
+
+    def get_permissions(self):
+        # if self.request.user.store:
+        #     return [IsAuthenticated(), HasStore()]
+        return [IsAuthenticated()]
+    
+    def get_serializer_context(self):
+        if store_models.Store.objects.filter(user_id=self.request.user.pk).exists():
+            return {'store_pk': self.request.user.store.pk, 'request': self.request}
+        return {'request': self.request}
 
 
 class ProductViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'head', 'options']
-    queryset = store_models.Product.objects.select_related('base_product__category') \
-        .select_related('base_product__sub_category').select_related('base_product__store__user__profile') \
-            .select_related('base_product__product_type').all()
     filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        queryset = store_models.Product.objects.select_related('base_product__category') \
+            .select_related('base_product__sub_category').select_related('base_product__store__user__profile') \
+                .select_related('base_product__product_type').prefetch_related(Prefetch(
+                    'items',
+                    queryset=models.SetProductItem.objects.select_related('item')
+                )).select_related('reviewer').all()
+        try:
+            store_id = self.request.user.store.pk
+            return queryset.filter(base_product__store_id=store_id)
+        except store_models.Store.DoesNotExist:
+            return queryset
+
+
+    def create(self, request, *args, **kwargs):
+        many_status = True if isinstance(request.data, list) else False
+        create_product_serializer = serializers.CreateProductSerializer(
+            data=request.data,
+            context={'request': self.request},
+            many=many_status
+        )
+        create_product_serializer.is_valid(raise_exception=True)
+        product_obj = create_product_serializer.save()
+        serializer = serializers.ProductSerializer(
+            product_obj,
+            context={'images': store_models.ProductImage.objects.all()},
+            many=many_status
+        )
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -426,13 +514,25 @@ class ProductViewSet(ModelViewSet):
         )
     
     def get_serializer_class(self):
-        if self.request.user.is_staff:
-            if self.request.method == 'PATCH':
-                return serializers.ReviewProductSerializer
+        # if self.request.method == 'PATCH':
+        #     if self.request.user.is_staff:
+        #         return serializers.ReviewProductSerializer
+        # if self.request.method == 'POST' and self.action == 'create':
+        #     return serializers.CreateProductSerializer
         return serializers.ProductSerializer
     
     def get_serializer_context(self):
-        return {'images': store_models.ProductImage.objects.all()}
+        return {'request': self.request}
+    
+    def get_permissions(self):
+        if self.action in [
+            'export_to_excel_all_products',
+            'export_to_excel_approved_products',
+            'export_to_excel_waiting_products',
+            'export_to_excel_not_approved_products'
+        ]:
+            return [IsAuthenticated(), IsStaff()]
+        return [IsAuthenticated()]
     
     @action(detail=False)
     def export_to_excel_all_products(self, request):
@@ -457,3 +557,50 @@ class ProductViewSet(ModelViewSet):
     @action(detail=False)
     def deactivate_all_products(self, request):
         ...
+
+
+class ProductCategoryViewSet(ModelViewSet):
+    queryset = store_models.ProductCategory.objects.all()
+    serializer_class = serializers.CreateProductCategorySerializer
+    permission_classes = [IsAuthenticated, IsStaff, AddCategoryPermission]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'properties__title']
+
+
+class ProductSubCategoryViewSet(ModelViewSet):
+    queryset = store_models.ProductSubCategory.objects.all()
+    serializer_class = serializers.CreateProductSubCategorySerializer
+    permission_classes = [IsAuthenticated, IsStaff, AddSubCategoryPermission]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'category__name']
+
+
+class ProductTypeViewSet(ModelViewSet):
+    queryset = store_models.ProductType.objects.all()
+    serializer_class = serializers.ProductTypeSerializer
+    permission_classes = [IsAuthenticated, IsStaff, AddProductTypePermission]
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'category__name', 'sub_category__name']
+
+
+class SupportCustomersViewSet(mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
+                            GenericViewSet):
+    ...
+
+
+class CustomerViewSet(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.ListModelMixin,
+                    GenericViewSet):
+    queryset = store_models.Customer.objects.all()
+    serializer_class = serializers.CustomerSerializer
+    permission_classes = [IsAuthenticated, IsStaff]
+
+
+class StoreViewSet(mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet):
+    ...
