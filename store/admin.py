@@ -99,6 +99,11 @@ class BaseProductAdmin(admin.ModelAdmin):
     list_display = ['title_farsi', 'store', 'category', 'sub_category', 'product_type']
 
 
+@admin.register(models.ProductBrand)
+class ProductBrandAdmin(admin.ModelAdmin):
+    ...
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [

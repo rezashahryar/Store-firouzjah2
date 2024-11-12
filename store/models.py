@@ -133,6 +133,7 @@ class ProductType(models.Model):
 class ProductBrand(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='brands')
     name = models.CharField(max_length=255)
+    english_name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name

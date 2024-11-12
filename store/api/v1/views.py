@@ -1,7 +1,8 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import generics
 from rest_framework import mixins
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 
 from store import models
@@ -16,10 +17,24 @@ class ProductViewSet(mixins.RetrieveModelMixin,
                    GenericViewSet):
     queryset = models.Product.approved.select_related('base_product__category').all()
     serializer_class = serializers.ListProductSerializer
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter]
+    search_fields = ['base_product__title_farsi']
     filterset_class = ListProductFilter
-    ordering_fields = ['datetime_created', 'unit_price']
+    ordering_fields = ['datetime_created', 'unit_price', 'count_sell']
     pagination_class = ListProductPagination
+    # lookup_field = 'slug'
+
+    def filter_queryset(self, queryset):
+        ordering = self.request.GET.get("ordering", None)
+        # ordering by property field
+        if ordering is not None:
+            if ordering == 'count_sell':
+                queryset = queryset.annotate(count_selll=Count('order_items')).order_by('count_selll')
+            if ordering == '-count_sell':
+                queryset = queryset.annotate(count_selll=Count('order_items')).order_by('-count_selll')
+            return queryset
+        
+        return super().filter_queryset(queryset)
 
     def get_serializer_context(self):
         return {'images': models.ProductImage.objects.all()}
@@ -28,3 +43,8 @@ class ProductViewSet(mixins.RetrieveModelMixin,
 class ProductCategoryListApiView(generics.ListAPIView):
     queryset = models.ProductCategory.objects.all()
     serializer_class = serializers.ProductCategorySerializer
+
+
+class ProductBrandListApiView(generics.ListAPIView):
+    queryset = models.ProductBrand.objects.all()
+    serializer_class = serializers.ProductBrandSerializer

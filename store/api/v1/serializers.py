@@ -19,7 +19,7 @@ class ListProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = [
-            'category', 'title', 'unit_price', 'inventory', 'price_after_discount', 'discount_percent', 'start_discount_datetime',
+            'id', 'category', 'title', 'slug', 'unit_price', 'inventory', 'price_after_discount', 'discount_percent', 'start_discount_datetime',
             'end_discount_datetime'
         ]
 
@@ -45,3 +45,9 @@ class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductCategory
         fields = ['id', 'name', 'image']
+
+
+class ProductBrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductBrand
+        fields = ['id', 'name', 'english_name']
