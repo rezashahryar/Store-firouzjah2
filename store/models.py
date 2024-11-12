@@ -405,6 +405,9 @@ class Order(models.Model):
     def __str__(self) -> str:
         return f'order_id={self.pk}'
     
+    def get_total_price(self):
+        return sum(item.quantity * item.purchased_price for item in self.items.all())
+    
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
