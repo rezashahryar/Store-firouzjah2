@@ -162,7 +162,7 @@ class BaseProduct(models.Model):
     product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE, related_name='products')
     brand = models.ForeignKey(ProductBrand, on_delete=models.PROTECT, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
-    title_english = models.CharField(max_length=255)
+    title_english = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField()
     authenticity = models.CharField(max_length=3, choices=ProductAuthenticity.choices)
     warranty = models.CharField(max_length=2, choices=ProductWarranty.choices)
