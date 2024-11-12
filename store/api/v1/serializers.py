@@ -19,7 +19,7 @@ class ListProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = [
-            'category', 'title', 'unit_price', 'price_after_discount', 'discount_percent', 'start_discount_datetime',
+            'category', 'title', 'unit_price', 'inventory', 'price_after_discount', 'discount_percent', 'start_discount_datetime',
             'end_discount_datetime'
         ]
 
@@ -38,11 +38,10 @@ class ListProductSerializer(serializers.ModelSerializer):
                 context['cover'] = ProductCoverSerializer(img_obj).data
             elif not img.base_product_id == instance.base_product.pk and img.is_cover:
                 continue
-        
-        # try:
-        #     cover = models.ProductImage.objects.get(base_product_id=instance.base_product.pk, is_cover=True)
-        # except models.ProductImage.DoesNotExist:
-        #     cover = None
-        # context['cover'] = ProductImageSerializer(cover).data
-
         return context
+    
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductCategory
+        fields = ['id', 'name', 'image']

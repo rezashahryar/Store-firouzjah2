@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from . import views
@@ -9,6 +9,6 @@ router.register('products', views.ProductViewSet, basename='products')
 
 
 urlpatterns = [
-    
+    path('list/categories/', views.ProductCategoryListApiView.as_view(), name='list_categories'),
 ] + router.urls
 

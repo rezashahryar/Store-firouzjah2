@@ -130,6 +130,14 @@ class ProductType(models.Model):
         return self.title
     
 
+class ProductBrand(models.Model):
+    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='brands')
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+    
+
 class BaseProduct(models.Model):
 
     class ProductAuthenticity(models.TextChoices):
@@ -151,6 +159,7 @@ class BaseProduct(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products')
     sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products')
     product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE, related_name='products')
+    brand = models.ForeignKey(ProductBrand, on_delete=models.PROTECT, related_name='products', null=True)
     title_farsi = models.CharField(max_length=255)
     title_english = models.CharField(max_length=255)
     description = models.TextField()
@@ -203,6 +212,14 @@ class ProductColor(models.Model):
         return self.name
     
 
+class ProductManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(active_status=True, product_status=Product.ProductStatus.APPROVED)
+
+    def available_products(self):
+        return self.get_queryset().filter(inventory__gt=0)
+    
+
 def generate_product_code():
     while True:
         try:
@@ -253,6 +270,9 @@ class Product(models.Model):
 
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_modified = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    approved = ProductManager()
 
     # def save(self, *args, **kwargs):
     #     self.slug = self.generate_unique_slug(self.base_product.pk, self.shenaase_kaala, self.barcode)
