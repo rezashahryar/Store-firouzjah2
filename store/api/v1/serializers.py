@@ -40,6 +40,24 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 
+class ProductCommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.ProductComment
+        fields = ['id', 'user', 'text', 'datetime_created']
+
+    def create(self, validated_data):
+        user_id = self.context['user_id']
+        product_id = self.context['product_id']
+        product_obj = models.Product.objects.get(id=product_id)
+        return models.ProductComment.objects.create(
+            user_id=user_id,
+            product_id=product_obj.base_product.pk,
+            **validated_data
+        )
+
+
 class BaseProductDetailSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     sub_category = serializers.StringRelatedField()
@@ -47,12 +65,13 @@ class BaseProductDetailSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source='store.store_name')
     shiping_range = serializers.SerializerMethodField()
     images = ProductImageSerializer(many=True)
+    comments = ProductCommentSerializer(many=True)
 
     class Meta:
         model = models.BaseProduct
         fields = [
             'id', 'category', 'sub_category', 'store_code', 'store_name', 'shiping_range', 'title_farsi',
-            'title_english', 'images'
+            'title_english', 'description', 'images', 'comments'
         ]
 
     def get_shiping_range(self, base_product):

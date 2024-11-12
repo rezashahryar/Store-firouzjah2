@@ -1,8 +1,9 @@
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.db.models import Count, Prefetch
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from panel.models import SetProductItem
@@ -30,7 +31,11 @@ class ProductViewSet(mixins.RetrieveModelMixin,
             return queryset.prefetch_related(Prefetch(
                 'items',
                 queryset=SetProductItem.objects.select_related('item')
-            )).select_related('base_product__store').prefetch_related('base_product__images')
+            )).select_related('base_product__store').prefetch_related('base_product__images') \
+            .prefetch_related(Prefetch(
+                'base_product__comments',
+                queryset=models.ProductComment.objects.select_related('user')
+            ))
         return queryset
 
     def get_serializer_class(self):
@@ -62,3 +67,18 @@ class ProductCategoryListApiView(generics.ListAPIView):
 class ProductBrandListApiView(generics.ListAPIView):
     queryset = models.ProductBrand.objects.all()
     serializer_class = serializers.ProductBrandSerializer
+
+
+class ProductCommentViewSet(mixins.CreateModelMixin,
+                            mixins.ListModelMixin,
+                            GenericViewSet):
+    serializer_class = serializers.ProductCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        product_id = self.kwargs['product_pk']
+        product_obj = models.Product.objects.get(id=product_id)
+        return models.ProductComment.objects.filter(product_id=product_obj.base_product.pk)
+
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.pk, 'product_id': self.kwargs['product_pk']}
