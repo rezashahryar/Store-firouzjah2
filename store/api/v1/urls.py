@@ -10,9 +10,12 @@ router.register('products', views.ProductViewSet, basename='products')
 product_routers = routers.NestedDefaultRouter(router, 'products', lookup='product')
 product_routers.register('comments', views.ProductCommentViewSet, basename='comments')
 
+comments_router = routers.NestedDefaultRouter(product_routers, 'comments', lookup='comment')
+comments_router.register('replies', views.ProductReplyCommentViewSet, basename='replies_comments')
+
 
 urlpatterns = [
     path('list/categories/', views.ProductCategoryListApiView.as_view(), name='list_categories'),
     path('list/brands/', views.ProductBrandListApiView.as_view(), name='list_brands'),
-] + router.urls + product_routers.urls
+] + router.urls + product_routers.urls + comments_router.urls
 

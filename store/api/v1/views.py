@@ -34,7 +34,10 @@ class ProductViewSet(mixins.RetrieveModelMixin,
             )).select_related('base_product__store').prefetch_related('base_product__images') \
             .prefetch_related(Prefetch(
                 'base_product__comments',
-                queryset=models.ProductComment.objects.select_related('user')
+                queryset=models.ProductComment.objects.select_related('user').prefetch_related(Prefetch(
+                    'replies',
+                    queryset=models.ProductReplyComment.objects.select_related('user')
+                ))
             ))
         return queryset
 
@@ -70,6 +73,7 @@ class ProductBrandListApiView(generics.ListAPIView):
 
 
 class ProductCommentViewSet(mixins.CreateModelMixin,
+                            mixins.RetrieveModelMixin,
                             mixins.ListModelMixin,
                             GenericViewSet):
     serializer_class = serializers.ProductCommentSerializer
@@ -77,8 +81,24 @@ class ProductCommentViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         product_id = self.kwargs['product_pk']
-        product_obj = models.Product.objects.get(id=product_id)
-        return models.ProductComment.objects.filter(product_id=product_obj.base_product.pk)
+
+        product_obj = models.Product.objects.select_related('base_product') \
+            .filter(id=product_id).values('base_product_id')
+        
+        return models.ProductComment.objects.select_related('product') \
+            .select_related('user').filter(product_id__in=product_obj)
 
     def get_serializer_context(self):
         return {'user_id': self.request.user.pk, 'product_id': self.kwargs['product_pk']}
+    
+
+class ProductReplyCommentViewSet(ModelViewSet):
+    queryset = models.ProductReplyComment.objects.all()
+    serializer_class = serializers.ProductReplyCommentSerializer
+
+    def get_queryset(self):
+        comment_pk = self.kwargs['comment_pk']
+        return models.ProductReplyComment.objects.select_related('user').filter(comment_id=comment_pk)
+    
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.pk, 'comment_id': self.kwargs['comment_pk']}

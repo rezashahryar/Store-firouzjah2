@@ -40,12 +40,30 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 
-class ProductCommentSerializer(serializers.ModelSerializer):
+class ProductReplyCommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
 
     class Meta:
-        model = models.ProductComment
+        model = models.ProductReplyComment
         fields = ['id', 'user', 'text', 'datetime_created']
+
+    def create(self, validated_data):
+        comment_id = self.context['comment_id']
+        user_id = self.context['user_id']
+        return models.ProductReplyComment.objects.create(
+            user_id=user_id,
+            comment_id=comment_id,
+            **validated_data
+        )
+
+
+class ProductCommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    replies = ProductReplyCommentSerializer(many=True)
+
+    class Meta:
+        model = models.ProductComment
+        fields = ['id', 'user', 'text', 'datetime_created', 'replies']
 
     def create(self, validated_data):
         user_id = self.context['user_id']
