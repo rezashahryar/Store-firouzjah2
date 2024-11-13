@@ -311,7 +311,7 @@ class ProductImage(models.Model):
 
 class ReportProduct(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reports')
-    products = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='reports')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='reports')
     text = models.TextField()
 
     datetime_created = models.DateTimeField(auto_now_add=True)

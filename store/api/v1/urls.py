@@ -10,6 +10,7 @@ router.register('products', views.ProductViewSet, basename='products')
 product_routers = routers.NestedDefaultRouter(router, 'products', lookup='product')
 product_routers.register('comments', views.ProductCommentViewSet, basename='comments')
 product_routers.register('similar-products', views.SimilarProductsViewSet, basename='similar-products')
+product_routers.register('report', views.SendReportProductViewSet, basename='report-product')
 
 comments_router = routers.NestedDefaultRouter(product_routers, 'comments', lookup='comment')
 comments_router.register('replies', views.ProductReplyCommentViewSet, basename='replies_comments')

@@ -179,3 +179,17 @@ class SimilarProductSerializer(serializers.ModelSerializer):
         if similar_product.product.discount_percent:
             return similar_product.product.unit_price - int(((similar_product.product.discount_percent / Decimal(100)) * similar_product.product.unit_price))
         return None
+    
+
+class SendReportProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ReportProduct
+        fields = ['id', 'text']
+
+    def create(self, validated_data):
+        product = models.Product.objects.get(slug=self.context['product_slug'])
+        return models.ReportProduct.objects.create(
+            user_id=self.context['user_id'],
+            product_id=product.pk,
+            **validated_data
+        )
