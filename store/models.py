@@ -246,7 +246,7 @@ class Product(models.Model):
     base_product = models.ForeignKey(BaseProduct, on_delete=models.CASCADE, related_name='products')
     product_code = models.CharField(max_length=6, unique=True, default=generate_product_code)
     inventory = models.PositiveIntegerField()
-    slug = models.SlugField(unique=True, null=True, blank=True)
+    slug = models.SlugField(unique=True, allow_unicode=True)
     unit = models.CharField(max_length=1, choices=ProductUnit.choices, null=True, blank=True)
     unit_price = models.IntegerField()
 

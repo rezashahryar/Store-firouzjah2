@@ -111,7 +111,7 @@ class ProductAdmin(admin.ModelAdmin):
         'product_status', 'active_status'
     ]
     list_editable = ['discount_percent', 'product_status', 'active_status']
-    exclude = ['slug']
+    readonly_fields = ['slug']
     list_select_related = ['base_product']
 
     @admin.display(ordering='base_product__title_farsi')

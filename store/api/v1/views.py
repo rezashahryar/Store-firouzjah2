@@ -22,7 +22,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
     filterset_class = ListProductFilter
     ordering_fields = ['datetime_created', 'unit_price', 'count_sell']
     pagination_class = ListProductPagination
-    # lookup_field = 'slug'
+    lookup_field = 'slug'
 
     def get_queryset(self):
         queryset = models.Product.approved.select_related('base_product__category') \
