@@ -62,6 +62,18 @@ class ProductViewSet(mixins.RetrieveModelMixin,
         return {'images': models.ProductImage.objects.all()}
     
 
+class SimilarProductsViewSet(ModelViewSet):
+    serializer_class = serializers.SimilarProductSerializer
+
+    def get_queryset(self):
+        product_obj = models.Product.approved.select_related('base_product').get(slug=self.kwargs['product_slug'])
+        queryset = models.SimilarProduct.objects.select_related('product__base_product') \
+            .select_related('store').filter(
+                product__base_product__title_farsi__icontains=product_obj.base_product.title_farsi
+            )
+        return queryset
+    
+
 class ProductCategoryListApiView(generics.ListAPIView):
     queryset = models.ProductCategory.objects.all()
     serializer_class = serializers.ProductCategorySerializer
@@ -80,16 +92,16 @@ class ProductCommentViewSet(mixins.CreateModelMixin,
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        product_id = self.kwargs['product_pk']
+        product_slug = self.kwargs['product_slug']
 
         product_obj = models.Product.objects.select_related('base_product') \
-            .filter(id=product_id).values('base_product_id')
+            .filter(slug=product_slug).values('base_product_id')
         
         return models.ProductComment.objects.select_related('product') \
             .select_related('user').filter(product_id__in=product_obj)
 
     def get_serializer_context(self):
-        return {'user_id': self.request.user.pk, 'product_id': self.kwargs['product_pk']}
+        return {'user_id': self.request.user.pk, 'product_id': self.kwargs['product_slug']}
     
 
 class ProductReplyCommentViewSet(ModelViewSet):

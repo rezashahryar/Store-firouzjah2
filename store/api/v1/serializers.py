@@ -162,3 +162,20 @@ class ProductBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductBrand
         fields = ['id', 'name', 'english_name']
+
+
+class SimilarProductSerializer(serializers.ModelSerializer):
+    store_code = serializers.CharField(source='store.store_code')
+    product_title = serializers.CharField(source='product.base_product.title_farsi')
+    unit_price = serializers.CharField(source='product.unit_price')
+    datetime_created = serializers.DateTimeField(source='product.datetime_created')
+    price_after_discount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.SimilarProduct
+        fields = ['id', 'store_code', 'product_title', 'unit_price', 'price_after_discount', 'datetime_created']
+
+    def get_price_after_discount(self, similar_product):
+        if similar_product.product.discount_percent:
+            return similar_product.product.unit_price - int(((similar_product.product.discount_percent / Decimal(100)) * similar_product.product.unit_price))
+        return None

@@ -107,7 +107,7 @@ class ProductBrandAdmin(admin.ModelAdmin):
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
-        'title', 'unit_price', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode',
+        'title', 'slug', 'unit_price', 'inventory', 'unit_price', 'discount_percent', 'shenaase_kaala', 'barcode',
         'product_status', 'active_status'
     ]
     list_editable = ['discount_percent', 'product_status', 'active_status']

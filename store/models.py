@@ -247,7 +247,6 @@ class Product(models.Model):
     product_code = models.CharField(max_length=6, unique=True, default=generate_product_code)
     inventory = models.PositiveIntegerField()
     slug = models.SlugField(unique=True, allow_unicode=True)
-    unit = models.CharField(max_length=1, choices=ProductUnit.choices, null=True, blank=True)
     unit_price = models.IntegerField()
 
     discount_percent = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], null=True, blank=True)
