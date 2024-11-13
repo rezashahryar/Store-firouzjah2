@@ -1,3 +1,4 @@
+from decimal import Decimal
 import random
 
 from uuid import uuid1, uuid4
@@ -293,6 +294,12 @@ class Product(models.Model):
             return self.base_product.images.get(id=self.pk, is_cover=True)
         except ProductImage.DoesNotExist:
             return None
+        
+    @property
+    def price_after_discount(self):
+        if self.discount_percent:
+            return self.unit_price - int(((self.discount_percent / Decimal(100)) * self.unit_price))
+        return None
 
 
 class ProductImage(models.Model):
