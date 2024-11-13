@@ -135,7 +135,17 @@ class CartViewSet(mixins.CreateModelMixin,
                 GenericViewSet):
     queryset = models.Cart.objects.prefetch_related(Prefetch(
         'items',
-        queryset=models.CartItem.objects.select_related('product__base_product')
+        queryset=models.CartItem.objects.select_related('product__base_product') \
+            .defer(
+                'product__product_code', 'product__inventory', 'product__start_discount_datetime', 'product__reason',
+                'product__end_discount_datetime', 'product__datetime_modified', 'product__active_status',
+                'product__datetime_created', 'product__reviewer_id', 'product__product_status', 'product__width_package',
+                'product__barcode', 'product__shenaase_kaala', 'product__weight_package', 'product__height_package',
+                'product__length_package', 'product__base_product__category', 'product__base_product__sub_category',
+                'product__base_product__store', 'product__base_product__product_type', 'product__base_product__brand',
+                'product__base_product__title_english', 'product__base_product__description',
+                'product__base_product__authenticity', 'product__base_product__warranty', 'product__base_product__shiping_method',
+            )
     )).all()
     serializer_class = serializers.CartSerializer
 
@@ -148,7 +158,17 @@ class CartItemViewSet(ModelViewSet):
 
     def get_queryset(self):
         cart_pk = self.kwargs['cart_pk']
-        return models.CartItem.objects.select_related('product__base_product').filter(cart_id=cart_pk)
+        return models.CartItem.objects.select_related('product__base_product') \
+            .filter(cart_id=cart_pk).defer(
+                'product__product_code', 'product__inventory', 'product__start_discount_datetime', 'product__reason',
+                'product__end_discount_datetime', 'product__datetime_modified', 'product__active_status',
+                'product__datetime_created', 'product__reviewer_id', 'product__product_status', 'product__width_package',
+                'product__barcode', 'product__shenaase_kaala', 'product__weight_package', 'product__height_package',
+                'product__length_package', 'product__base_product__category', 'product__base_product__sub_category',
+                'product__base_product__store', 'product__base_product__product_type', 'product__base_product__brand',
+                'product__base_product__title_english', 'product__base_product__description',
+                'product__base_product__authenticity', 'product__base_product__warranty', 'product__base_product__shiping_method',
+            )
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
