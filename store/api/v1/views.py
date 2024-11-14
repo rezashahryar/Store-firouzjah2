@@ -70,6 +70,19 @@ class SimilarProductsViewSet(ModelViewSet):
         queryset = models.SimilarProduct.objects.select_related('product__base_product') \
             .select_related('store').filter(
                 product__base_product__title_farsi__icontains=product_obj.base_product.title_farsi
+            ).defer(
+                'store__email', 'store__shabaa_num', 'store__mobile_num', 'store__phone_num', 'store__city',
+                'store__mantaghe', 'store__mahalle', 'store__user', 'store__address', 'store__post_code',
+                'store__store_type', 'product__inventory', 'product__start_discount_datetime',
+                'product__end_discount_datetime', 'product__length_package', 'product__weight_package',
+                'product__height_package', 'product__width_package', 'product__shenaase_kaala', 'product__barcode',
+                'product__product_status', 'product__active_status', 'product__product_code', 'product__reviewer',
+                'product__reason', 'product__datetime_modified', 'product__base_product__category',
+                'product__base_product__sub_category', 'product__base_product__title_english',
+                'product__base_product__description', 'product__base_product__authenticity',
+                'product__base_product__warranty', 'product__base_product__shiping_method',
+                'product__base_product__brand', 'product__base_product__store',
+                'product__base_product__product_type',
             )
         return queryset
     
