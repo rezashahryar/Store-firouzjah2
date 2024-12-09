@@ -25,7 +25,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
     lookup_field = 'slug'
 
     def get_queryset(self):
-        queryset = models.Product.approved.select_related('base_product__category') \
+        queryset = models.Product.objects.select_related('base_product__category') \
             .select_related('base_product__sub_category').all()
         if self.action == 'retrieve':
             return queryset.prefetch_related(Prefetch(
@@ -39,7 +39,13 @@ class ProductViewSet(mixins.RetrieveModelMixin,
                     queryset=models.ProductReplyComment.objects.select_related('user')
                 ))
             ))
-        return queryset
+        return queryset.defer(
+            'length_package', 'width_package', 'height_package', 'weight_package', 'shenaase_kaala', 'barcode',
+            'product_code', 'product_status', 'active_status', 'reviewer_id', 'datetime_created', 'datetime_modified',
+            'base_product__product_type', 'base_product__title_english', 'base_product__authenticity',
+            'base_product__description', 'base_product__warranty', 'base_product__shiping_method', 'base_product__category__image',
+            'base_product__sub_category__image', 'base_product__brand'
+        )
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
