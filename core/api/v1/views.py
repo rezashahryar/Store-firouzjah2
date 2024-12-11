@@ -48,7 +48,7 @@ class VerifyOtpView(generics.GenericAPIView):
         except User.DoesNotExist:
             user = User.objects.create(email=data['email'])
             user.save()
-            user.username = f'user_{user.pk}'
+            user.username = str(user.email)
             user.save()
 
             user_token = user.auth_token

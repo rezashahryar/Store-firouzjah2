@@ -174,9 +174,10 @@ class SimilarProductSerializer(serializers.ModelSerializer):
     
 
 class SendReportProductSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
     class Meta:
         model = models.ReportProduct
-        fields = ['id', 'text']
+        fields = ['id', 'user', 'text']
 
     def create(self, validated_data):
         product = models.Product.objects.get(slug=self.context['product_slug'])

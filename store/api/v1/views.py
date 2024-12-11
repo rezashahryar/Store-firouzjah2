@@ -68,7 +68,7 @@ class ProductViewSet(mixins.RetrieveModelMixin,
         return {'images': models.ProductImage.objects.all()}
     
 
-class SimilarProductsViewSet(ModelViewSet):
+class SimilarProductsListApiView(generics.ListAPIView):
     serializer_class = serializers.SimilarProductSerializer
 
     def get_queryset(self):
@@ -93,14 +93,13 @@ class SimilarProductsViewSet(ModelViewSet):
         return queryset
     
 
-class SendReportProductViewSet(mixins.CreateModelMixin,
-                               mixins.ListModelMixin,
-                            GenericViewSet):
+class SendReportProductListCreateApiView(generics.ListCreateAPIView):
     serializer_class = serializers.SendReportProductSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return models.ReportProduct.objects.filter(product__slug=self.kwargs['product_slug'])
+        return models.ReportProduct.objects.select_related('user') \
+            .filter(product__slug=self.kwargs['product_slug'])
 
     def get_serializer_context(self):
         return {'product_slug': self.kwargs['product_slug'], 'user_id': self.request.user.pk}

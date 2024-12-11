@@ -104,9 +104,12 @@ class ProductProperties(models.Model):
 
 class ProductCategory(models.Model):
     properties = models.ManyToManyField(ProductProperties, related_name='categories')
+    user_creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='made_categories', null=True)
     name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, default=uuid1)
+    slug = models.SlugField(unique=True, allow_unicode=True)
     image = models.ImageField(upload_to='store/product-category-images/')
+
+    datetime_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.name
@@ -405,11 +408,11 @@ def generate_order_tracking_code():
 
 class Order(models.Model):
 
-    class OrderStatus(models.TextChoices):
-        CURRENT_ORDERS = 'ou', _('جاری')
-        ORDERS_DELIVERED = 'od', _('تحویل داده شده')
-        RETURN_ORDERS = 'or', _('مرجوع شده')
-        CANCELED_ORDERS = 'oc', _('لغو شده')
+    class OrderStatusChoices(models.TextChoices):
+        CURRENT = 'ou', _('جاری')
+        DELIVERED = 'od', _('تحویل داده شده')
+        RETURN = 'or', _('مرجوع شده')
+        CANCELED = 'oc', _('لغو شده')
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
     
@@ -428,7 +431,7 @@ class Order(models.Model):
 
     tracking_code = models.CharField(max_length=25, unique=True, default=generate_order_tracking_code)
 
-    status = models.CharField(max_length=2, choices=OrderStatus.choices, default=OrderStatus.CURRENT_ORDERS)
+    status = models.CharField(max_length=2, choices=OrderStatusChoices.choices, default=OrderStatusChoices.CURRENT)
 
     datetime_created = models.DateTimeField(auto_now_add=True)
 
